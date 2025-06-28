@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Estoque - FUNCIONANDO</title>
+    <title>Controle de Estoque - TEMPO REAL</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -33,6 +33,7 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
@@ -41,8 +42,42 @@
         }
 
         .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             margin-top: 15px;
             font-size: 1.1rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff00;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.disconnected {
+            background: #ff0000;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .realtime-badge {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
         .main-content {
@@ -62,6 +97,11 @@
             padding: 20px;
             border-radius: 10px;
             text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
 
         .stat-card h3 {
@@ -73,6 +113,17 @@
         .stat-card .number {
             font-size: 2rem;
             font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card.updated .number {
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
         }
 
         .form-section {
@@ -105,6 +156,7 @@
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 1rem;
+            transition: border-color 0.3s;
         }
 
         .form-group input:focus {
@@ -122,10 +174,18 @@
             cursor: pointer;
             display: block;
             margin: 15px auto 0;
+            transition: all 0.3s ease;
         }
 
         .btn:hover {
-            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .products-grid {
@@ -138,6 +198,45 @@
             border: 2px solid #eee;
             border-radius: 10px;
             padding: 20px;
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .product-card:hover {
+            border-color: #4CAF50;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .product-card.new {
+            animation: newItem 0.8s ease-out;
+            border-color: #4CAF50;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes newItem {
+            0% {
+                transform: scale(0.8);
+                background: #e8f5e8;
+            }
+            50% {
+                transform: scale(1.05);
+                background: #e8f5e8;
+            }
+            100% {
+                transform: scale(1);
+                background: white;
+            }
         }
 
         .product-header {
@@ -187,6 +286,7 @@
             border-radius: 12px;
             font-weight: bold;
             font-size: 0.8rem;
+            transition: all 0.3s ease;
         }
 
         .stock-high { background: #d4edda; color: #155724; }
@@ -215,6 +315,28 @@
             margin: 10px 0;
         }
 
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
         .refresh-btn {
             background: #007bff;
             color: white;
@@ -223,14 +345,14 @@
             border-radius: 5px;
             cursor: pointer;
             margin: 10px;
+            opacity: 0.7;
         }
 
-        .debug-info {
-            background: #e9ecef;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-            font-family: monospace;
+        .connection-status {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 15px;
+            border-radius: 20px;
+            margin: 10px 0;
             font-size: 0.9rem;
         }
     </style>
@@ -238,98 +360,104 @@
 <body>
     <div class="container">
         <div class="header">
+            <div class="realtime-badge">⚡ TEMPO REAL</div>
             <h1>🚀 Controle de Estoque</h1>
-            <p>Sistema Supabase - URL CORRIGIDA</p>
-            <div class="status" id="status">🔄 Conectando...</div>
+            <p>Sistema com Sincronização em Tempo Real</p>
+            <div class="status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="connectionStatus">🔄 Conectando...</span>
+            </div>
+            <div class="connection-status" id="realtimeStatus">
+                📡 WebSocket: Inicializando...
+            </div>
         </div>
 
         <div class="main-content">
-            <!-- Debug Info -->
-            <div class="debug-info">
-                <strong>🔍 Debug Info:</strong><br>
-                URL: https://bfmsnvaadrlhlofmlprt.supabase.co<br>
-                Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-            </div>
-
             <!-- Estatísticas -->
             <div class="stats">
-                <div class="stat-card">
+                <div class="stat-card" id="statTotal">
                     <h3>Total de Produtos</h3>
                     <div class="number" id="totalProducts">-</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" id="statValue">
                     <h3>Valor Total</h3>
                     <div class="number" id="totalValue">R$ 0,00</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" id="statLow">
                     <h3>Estoque Baixo</h3>
                     <div class="number" id="lowStock">-</div>
                 </div>
             </div>
 
-            <button class="refresh-btn" onclick="loadProducts()">🔄 Atualizar</button>
+            <button class="refresh-btn" onclick="loadProducts()" style="opacity: 0.5;">
+                🔄 Atualização Manual (Desnecessária)
+            </button>
 
             <!-- Mensagens -->
             <div id="message"></div>
 
             <!-- Formulário -->
             <div class="form-section">
-                <h2>➕ Adicionar Produto</h2>
+                <h2>➕ Adicionar Produto (Tempo Real Ativo)</h2>
                 <form id="productForm">
                     <div class="form-grid">
                         <div class="form-group">
                             <label>ID:</label>
-                            <input type="text" id="id" required>
+                            <input type="text" id="id" required placeholder="Ex: VT001">
                         </div>
                         <div class="form-group">
                             <label>Tipo:</label>
-                            <input type="text" id="tipo" required>
+                            <input type="text" id="tipo" required placeholder="Ex: Fiber Pro">
                         </div>
                         <div class="form-group">
                             <label>Potência:</label>
-                            <input type="text" id="potencia" required>
+                            <input type="text" id="potencia" required placeholder="Ex: 50w">
                         </div>
                         <div class="form-group">
                             <label>Área:</label>
-                            <input type="text" id="area_util" required>
+                            <input type="text" id="area_util" required placeholder="Ex: 50x50">
                         </div>
                         <div class="form-group">
                             <label>Categoria:</label>
-                            <input type="text" id="categoria" required>
+                            <input type="text" id="categoria" required placeholder="Ex: Laser">
                         </div>
                         <div class="form-group">
                             <label>Estoque:</label>
-                            <input type="number" id="estoque" required>
+                            <input type="number" id="estoque" required placeholder="Ex: 15">
                         </div>
                         <div class="form-group">
                             <label>Valor:</label>
-                            <input type="number" id="valor" step="0.01" required>
+                            <input type="number" id="valor" step="0.01" required placeholder="Ex: 5500.00">
                         </div>
                     </div>
-                    <button type="submit" class="btn">➕ Adicionar</button>
+                    <button type="submit" class="btn" id="submitBtn">⚡ Adicionar (Tempo Real)</button>
                 </form>
             </div>
 
             <!-- Produtos -->
-            <h2>📋 Lista de Produtos</h2>
+            <h2>📋 Lista de Produtos (Atualização Automática)</h2>
             <div id="productsContainer" class="products-grid">
-                <div class="message">🔄 Carregando...</div>
+                <div class="message">🔄 Carregando produtos...</div>
             </div>
         </div>
     </div>
 
+    <!-- Notificação -->
+    <div id="notification" class="notification"></div>
+
     <script>
-        // CONFIGURAÇÃO CORRIGIDA - URL CERTA!
+        // CONFIGURAÇÃO
         const SUPABASE_URL = 'https://bfmsnvaadrlhlofmlprt.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmbXNudmFhZHJsaGxvZm1scHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExMjkxODgsImV4cCI6MjA2NjcwNTE4OH0.LPipIRVv2yZH3pTb6Zdz2Jqj7pQ1X5mjZ4ikF_R_Fik';
         
-        console.log('🔧 Iniciando com URL correta:', SUPABASE_URL);
+        console.log('🚀 Iniciando app com TEMPO REAL');
         
         // Inicializar Supabase
         const { createClient } = supabase;
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let products = [];
+        let realtimeChannel = null;
 
         // Elementos DOM
         const totalProducts = document.getElementById('totalProducts');
@@ -338,7 +466,11 @@
         const productsContainer = document.getElementById('productsContainer');
         const productForm = document.getElementById('productForm');
         const message = document.getElementById('message');
-        const status = document.getElementById('status');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const realtimeStatus = document.getElementById('realtimeStatus');
+        const statusDot = document.getElementById('statusDot');
+        const notification = document.getElementById('notification');
+        const submitBtn = document.getElementById('submitBtn');
 
         // Funções utilitárias
         function formatCurrency(value) {
@@ -354,16 +486,30 @@
             return 'stock-low';
         }
 
+        function showNotification(text, type = 'success') {
+            notification.textContent = text;
+            notification.className = `notification ${type} show`;
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
         function showMessage(text, type = 'success') {
             message.innerHTML = `<div class="${type}">${text}</div>`;
             setTimeout(() => message.innerHTML = '', 3000);
         }
 
-        // Atualizar estatísticas
+        // Atualizar estatísticas com animação
         function updateStats() {
             const total = products.length;
             const totalVal = products.reduce((sum, p) => sum + (p.valor * p.estoque), 0);
             const lowStockCount = products.filter(p => p.estoque < 5).length;
+
+            // Animar mudanças
+            if (totalProducts.textContent !== total.toString()) {
+                document.getElementById('statTotal').classList.add('updated');
+                setTimeout(() => document.getElementById('statTotal').classList.remove('updated'), 600);
+            }
 
             totalProducts.textContent = total;
             totalValue.textContent = formatCurrency(totalVal);
@@ -377,8 +523,8 @@
                 return;
             }
 
-            const html = products.map(product => `
-                <div class="product-card">
+            const html = products.map((product, index) => `
+                <div class="product-card" data-id="${product.id}">
                     <div class="product-header">
                         <div class="product-id">${product.id}</div>
                         <div class="product-value">${formatCurrency(product.valor)}</div>
@@ -413,31 +559,101 @@
             productsContainer.innerHTML = html;
         }
 
-        // Carregar produtos
+        // Carregar produtos inicial
         async function loadProducts() {
             try {
-                console.log('📡 Tentando conectar com Supabase...');
-                status.textContent = '🔄 Carregando...';
+                console.log('📡 Carregando produtos...');
+                connectionStatus.textContent = '🔄 Carregando dados...';
                 
                 const { data, error } = await supabaseClient
                     .from('produtos')
                     .select('*')
                     .order('id');
 
-                console.log('📊 Resposta do Supabase:', { data, error });
-
                 if (error) throw error;
 
                 products = data || [];
                 renderProducts();
                 updateStats();
-                status.textContent = '✅ Conectado e funcionando!';
-                showMessage('✅ Produtos carregados com sucesso!');
+                connectionStatus.textContent = '✅ Dados carregados';
 
             } catch (error) {
-                console.error('❌ Erro detalhado:', error);
-                status.textContent = '❌ Erro na conexão';
+                console.error('❌ Erro ao carregar:', error);
+                connectionStatus.textContent = '❌ Erro nos dados';
                 showMessage(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Configurar tempo real
+        function setupRealtime() {
+            console.log('🔗 Configurando tempo real...');
+            realtimeStatus.textContent = '📡 WebSocket: Conectando...';
+
+            try {
+                realtimeChannel = supabaseClient
+                    .channel('public:produtos')
+                    .on('postgres_changes', {
+                        event: '*',
+                        schema: 'public',
+                        table: 'produtos'
+                    }, (payload) => {
+                        console.log('⚡ TEMPO REAL - Mudança detectada:', payload);
+                        
+                        if (payload.eventType === 'INSERT') {
+                            console.log('➕ Novo produto:', payload.new);
+                            products.push(payload.new);
+                            showNotification('🆕 Novo produto adicionado em tempo real!');
+                            
+                            // Destacar novo item
+                            setTimeout(() => {
+                                const newCard = document.querySelector(`[data-id="${payload.new.id}"]`);
+                                if (newCard) newCard.classList.add('new');
+                            }, 100);
+                            
+                        } else if (payload.eventType === 'UPDATE') {
+                            console.log('🔄 Produto atualizado:', payload.new);
+                            const index = products.findIndex(p => p.id === payload.new.id);
+                            if (index !== -1) {
+                                products[index] = payload.new;
+                                showNotification('🔄 Produto atualizado em tempo real!');
+                            }
+                            
+                        } else if (payload.eventType === 'DELETE') {
+                            console.log('🗑️ Produto removido:', payload.old);
+                            products = products.filter(p => p.id !== payload.old.id);
+                            showNotification('🗑️ Produto removido em tempo real!');
+                        }
+                        
+                        renderProducts();
+                        updateStats();
+                    })
+                    .subscribe((status) => {
+                        console.log('📡 Status da conexão WebSocket:', status);
+                        
+                        if (status === 'SUBSCRIBED') {
+                            realtimeStatus.textContent = '⚡ WebSocket: CONECTADO E ATIVO';
+                            statusDot.classList.remove('disconnected');
+                            connectionStatus.textContent = '⚡ Tempo Real Ativo';
+                            showNotification('⚡ Tempo real ativado com sucesso!');
+                            
+                        } else if (status === 'CHANNEL_ERROR') {
+                            realtimeStatus.textContent = '❌ WebSocket: ERRO';
+                            statusDot.classList.add('disconnected');
+                            connectionStatus.textContent = '❌ Erro no tempo real';
+                            
+                        } else if (status === 'TIMED_OUT') {
+                            realtimeStatus.textContent = '⏰ WebSocket: TIMEOUT';
+                            statusDot.classList.add('disconnected');
+                            
+                        } else {
+                            realtimeStatus.textContent = `📡 WebSocket: ${status}`;
+                        }
+                    });
+
+            } catch (error) {
+                console.error('❌ Erro no tempo real:', error);
+                realtimeStatus.textContent = '❌ WebSocket: FALHOU';
+                statusDot.classList.add('disconnected');
             }
         }
 
@@ -445,6 +661,8 @@
         async function addProduct(data) {
             try {
                 console.log('➕ Adicionando produto:', data);
+                submitBtn.disabled = true;
+                submitBtn.textContent = '⏳ Adicionando...';
                 
                 const { error } = await supabaseClient
                     .from('produtos')
@@ -452,13 +670,15 @@
 
                 if (error) throw error;
 
-                showMessage('✅ Produto adicionado com sucesso!');
+                showMessage('✅ Produto adicionado! Aguarde aparecer em tempo real...');
                 productForm.reset();
-                loadProducts(); // Recarregar lista
 
             } catch (error) {
                 console.error('❌ Erro ao adicionar:', error);
                 showMessage(`❌ Erro: ${error.message}`, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '⚡ Adicionar (Tempo Real)';
             }
         }
 
@@ -467,11 +687,11 @@
             e.preventDefault();
             
             const data = {
-                id: document.getElementById('id').value,
-                tipo: document.getElementById('tipo').value,
-                potencia: document.getElementById('potencia').value,
-                area_util: document.getElementById('area_util').value,
-                categoria: document.getElementById('categoria').value,
+                id: document.getElementById('id').value.trim(),
+                tipo: document.getElementById('tipo').value.trim(),
+                potencia: document.getElementById('potencia').value.trim(),
+                area_util: document.getElementById('area_util').value.trim(),
+                categoria: document.getElementById('categoria').value.trim(),
                 estoque: parseInt(document.getElementById('estoque').value),
                 valor: parseFloat(document.getElementById('valor').value)
             };
@@ -479,11 +699,28 @@
             await addProduct(data);
         });
 
-        // Inicializar
-        window.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 App inicializado!');
-            loadProducts();
+        // Inicializar aplicação
+        async function init() {
+            console.log('🚀 Inicializando aplicação com tempo real');
+            
+            // Carregar dados iniciais
+            await loadProducts();
+            
+            // Configurar tempo real
+            setupRealtime();
+            
+            console.log('✅ Aplicação inicializada');
+        }
+
+        // Cleanup ao sair
+        window.addEventListener('beforeunload', () => {
+            if (realtimeChannel) {
+                realtimeChannel.unsubscribe();
+            }
         });
+
+        // Iniciar quando página carregar
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
