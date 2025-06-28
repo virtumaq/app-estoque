@@ -480,7 +480,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>📦 Sistema de Estoque</h1>
+            <h1>Sistema de Estoque</h1>
             <p>Gerencie seus produtos de forma simples e eficiente</p>
             <div class="status">
                 <div class="status-dot"></div>
@@ -527,7 +527,7 @@
             <div class="card-content">
                 <div class="controls">
                     <div class="form-group">
-                        <label class="form-label">🔍 Buscar produto</label>
+                        <label class="form-label">Buscar produto</label>
                         <input type="text" id="searchInput" class="form-input" placeholder="Nome, ID ou categoria...">
                     </div>
                     
@@ -549,8 +549,8 @@
                     </div>
                     
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-secondary btn-small" onclick="exportToExcel()">📊 Excel</button>
-                        <button class="btn btn-secondary btn-small" onclick="exportToPDF()">📄 PDF</button>
+                        <button class="btn btn-secondary btn-small" onclick="exportToExcel()">Excel</button>
+                        <button class="btn btn-secondary btn-small" onclick="exportToPDF()">PDF</button>
                     </div>
                 </div>
             </div>
@@ -559,7 +559,7 @@
         <!-- Adicionar Produto -->
         <div class="card">
             <div class="card-header">
-                <div class="card-title">➕ Adicionar Produto</div>
+                <div class="card-title">Adicionar Produto</div>
                 <div class="card-subtitle">Cadastre um novo item no estoque</div>
             </div>
             <div class="card-content">
@@ -602,7 +602,7 @@
         <!-- Lista de Produtos -->
         <div class="card">
             <div class="card-header">
-                <div class="card-title">📋 Produtos em Estoque</div>
+                <div class="card-title">Produtos em Estoque</div>
                 <div class="card-subtitle">Gerencie seus produtos cadastrados</div>
             </div>
             <div class="card-content">
@@ -853,7 +853,7 @@
             if (filteredProducts.length === 0) {
                 productsContainer.innerHTML = `
                     <div class="empty-state">
-                        <h3>${products.length === 0 ? '📦 Nenhum produto cadastrado' : '🔍 Nenhum produto encontrado'}</h3>
+                        <h3>${products.length === 0 ? 'Nenhum produto cadastrado' : 'Nenhum produto encontrado'}</h3>
                         <p>${products.length === 0 ? 'Adicione seu primeiro produto usando o formulário acima' : 'Tente ajustar os filtros de busca'}</p>
                     </div>
                 `;
@@ -864,11 +864,11 @@
                 <div class="product-card ${editingProductId === product.id ? 'editing' : ''}" data-id="${product.id}">
                     <div class="product-actions">
                         ${editingProductId === product.id ? `
-                            <button class="btn btn-success btn-small" onclick="saveProduct('${product.id}')" title="Salvar">💾</button>
+                            <button class="btn btn-success btn-small" onclick="saveProduct('${product.id}')" title="Salvar">✓</button>
                             <button class="btn btn-secondary btn-small" onclick="cancelEdit()" title="Cancelar">✕</button>
                         ` : `
-                            <button class="btn btn-secondary btn-small" onclick="editProduct('${product.id}')" title="Editar">✏️</button>
-                            <button class="btn btn-danger btn-small" onclick="deleteProduct('${product.id}')" title="Excluir">🗑️</button>
+                            <button class="btn btn-secondary btn-small" onclick="editProduct('${product.id}')" title="Editar">✎</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteProduct('${product.id}')" title="Excluir">✕</button>
                         `}
                     </div>
                     
@@ -967,12 +967,12 @@
 
                 if (error) throw error;
 
-                showNotification('✅ Produto atualizado com sucesso!', 'success');
+                showNotification('Produto atualizado com sucesso!', 'success');
                 editingProductId = null;
 
             } catch (error) {
                 console.error('Erro ao atualizar:', error);
-                showNotification(`❌ Erro: ${error.message}`, 'error');
+                showNotification(`Erro: ${error.message}`, 'error');
             }
         }
 
@@ -998,7 +998,7 @@
 
                 if (error) throw error;
 
-                showNotification('✅ Produto deletado com sucesso!', 'success');
+                showNotification('Produto deletado com sucesso!', 'success');
                 closeModal();
 
             } catch (error) {
@@ -1024,7 +1024,7 @@
             XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
             XLSX.writeFile(wb, `estoque_${new Date().toISOString().split('T')[0]}.xlsx`);
             
-            showNotification('📊 Relatório Excel gerado com sucesso!', 'success');
+            showNotification('Relatório Excel gerado com sucesso!', 'success');
         }
 
         function exportToPDF() {
@@ -1050,7 +1050,7 @@
             });
             
             doc.save(`estoque_${new Date().toISOString().split('T')[0]}.pdf`);
-            showNotification('📄 Relatório PDF gerado com sucesso!', 'success');
+            showNotification('Relatório PDF gerado com sucesso!', 'success');
         }
 
         // Carregar produtos
@@ -1075,7 +1075,7 @@
             } catch (error) {
                 console.error('Erro ao carregar:', error);
                 connectionStatus.textContent = 'Erro de conexão';
-                showNotification(`❌ Erro ao carregar dados: ${error.message}`, 'error');
+                showNotification(`Erro ao carregar dados: ${error.message}`, 'error');
             }
         }
 
@@ -1092,18 +1092,18 @@
                     
                     if (payload.eventType === 'INSERT') {
                         products.push(payload.new);
-                        showNotification('🆕 Novo produto adicionado!', 'success');
+                        showNotification('Novo produto adicionado!', 'success');
                         
                     } else if (payload.eventType === 'UPDATE') {
                         const index = products.findIndex(p => p.id === payload.new.id);
                         if (index !== -1) {
                             products[index] = payload.new;
-                            showNotification('🔄 Produto atualizado!', 'success');
+                            showNotification('Produto atualizado!', 'success');
                         }
                         
                     } else if (payload.eventType === 'DELETE') {
                         products = products.filter(p => p.id !== payload.old.id);
-                        showNotification('🗑️ Produto removido!', 'success');
+                        showNotification('Produto removido!', 'success');
                     }
                     
                     updateCategoryFilter();
@@ -1121,12 +1121,12 @@
 
                 if (error) throw error;
 
-                showNotification('✅ Produto adicionado com sucesso!', 'success');
+                showNotification('Produto adicionado com sucesso!', 'success');
                 productForm.reset();
 
             } catch (error) {
                 console.error('Erro ao adicionar:', error);
-                showNotification(`❌ Erro ao adicionar produto: ${error.message}`, 'error');
+                showNotification(`Erro ao adicionar produto: ${error.message}`, 'error');
             }
         }
 
