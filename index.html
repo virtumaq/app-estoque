@@ -285,6 +285,8 @@
             padding: 20px;
             transition: all 0.3s ease;
             position: relative;
+            /* CORREÇÃO: Adicionado padding-top extra para acomodar os botões */
+            padding-top: 60px;
         }
 
         .product-card:hover {
@@ -303,6 +305,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            /* CORREÇÃO: Removido margin-top para evitar sobreposição */
         }
 
         .product-id {
@@ -317,24 +320,37 @@
             color: #f5576c;
         }
 
+        /* CORREÇÃO: Melhorado o posicionamento dos botões */
         .product-actions {
             display: flex;
             gap: 8px;
             position: absolute;
             top: 15px;
             right: 15px;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 5px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .btn-small {
-            padding: 6px 12px;
+            padding: 8px 12px;
             font-size: 0.8rem;
             border-radius: 5px;
+            min-width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .product-details {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
+            gap: 15px;
+            /* CORREÇÃO: Adicionado margin-top para espaçamento */
+            margin-top: 10px;
         }
 
         .detail-item {
@@ -346,19 +362,24 @@
             font-size: 0.8rem;
             color: #666;
             text-transform: uppercase;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
+            font-weight: 600;
         }
 
         .detail-value {
             font-weight: bold;
             color: #333;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
         }
 
         .detail-input {
-            padding: 5px;
+            padding: 5px 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 0.9rem;
+            width: 100%;
         }
 
         .stock-badge {
@@ -366,6 +387,9 @@
             border-radius: 12px;
             font-weight: bold;
             font-size: 0.8rem;
+            display: inline-block;
+            text-align: center;
+            min-width: 40px;
         }
 
         .stock-high { background: #d4edda; color: #155724; }
@@ -445,6 +469,15 @@
             
             .export-buttons {
                 justify-content: center;
+            }
+
+            /* CORREÇÃO: Ajuste para mobile */
+            .product-card {
+                padding-top: 70px;
+            }
+
+            .product-details {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -776,11 +809,11 @@
                 <div class="product-card ${editingProductId === product.id ? 'editing' : ''}" data-id="${product.id}">
                     <div class="product-actions">
                         ${editingProductId === product.id ? `
-                            <button class="btn btn-small btn-save" onclick="saveProduct('${product.id}')">💾</button>
-                            <button class="btn btn-small btn-cancel" onclick="cancelEdit()">❌</button>
+                            <button class="btn btn-small btn-save" onclick="saveProduct('${product.id}')" title="Salvar">💾</button>
+                            <button class="btn btn-small btn-cancel" onclick="cancelEdit()" title="Cancelar">❌</button>
                         ` : `
-                            <button class="btn btn-small btn-edit" onclick="editProduct('${product.id}')">✏️</button>
-                            <button class="btn btn-small btn-delete" onclick="deleteProduct('${product.id}')">🗑️</button>
+                            <button class="btn btn-small btn-edit" onclick="editProduct('${product.id}')" title="Editar">✏️</button>
+                            <button class="btn btn-small btn-delete" onclick="deleteProduct('${product.id}')" title="Excluir">🗑️</button>
                         `}
                     </div>
                     
