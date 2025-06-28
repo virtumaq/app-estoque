@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Estoque</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fb;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+            width: 100%;
+            max-width: 420px;
+            margin: 20px;
+        }
+
+        .login-header {
+            text-align: center;
+            padding: 40px 32px 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .login-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: #6b7280;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f9fb;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #6366f1;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #6366f1;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .login-content {
+            padding: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.05);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5856eb;
+        }
+
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .notification {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .notification.success {
+            background: #f0fdf4;
+            border: 1px solid #10b981;
+            color: #166534;
+        }
+
+        .notification.error {
+            background: #fef2f2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+
+        .demo-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+
+        .demo-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .demo-users {
+            display: grid;
+            gap: 12px;
+        }
+
+        .demo-user {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .demo-user:hover {
+            border-color: #6366f1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .demo-user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .demo-email {
+            font-size: 0.9rem;
+            color: #6366f1;
+            font-weight: 500;
+        }
+
+        .demo-password {
+            font-size: 0.8rem;
+            color: #6b7280;
+            font-family: monospace;
+        }
+
+        .demo-badge {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-admin {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-gerente {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-usuario {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                margin: 16px;
+            }
+            
+            .login-header {
+                padding: 32px 24px 16px;
+            }
+            
+            .login-content {
+                padding: 24px;
+            }
+            
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Header -->
+        <div class="login-header">
+            <h1>Sistema de Estoque</h1>
+            <p>Gerencie seus produtos de forma simples e eficiente</p>
+            <div class="status">
+                <div class="status-dot"></div>
+                <span>Sistema ativo</span>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="login-content">
+            <!-- Notification -->
+            <div id="notification" class="notification"></div>
+
+            <!-- Login Form -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" id="email" class="form-input" required placeholder="Digite seu email">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="senha">Senha</label>
+                    <input type="password" id="senha" class="form-input" required placeholder="Digite sua senha">
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    <span id="loginText">Entrar</span>
+                </button>
+            </form>
+
+            <!-- Demo Users Section -->
+            <div class="demo-section">
+                <div class="demo-title">Usuários de Demonstração</div>
+                <div class="demo-users">
+                    <div class="demo-user" onclick="fillLogin('admin@empresa.com', 'admin123')">
+                        <div class="demo-user-info">
+                            <div class="demo-email">admin@empresa.com</div>
+                            <div class="demo-password">admin123</div>
+                        </div>
+                        <div class="demo-badge badge-admin">Admin</div>
+                    </div>
+
+                    <div class="demo-user" onclick="fillLogin('joao@empresa.com', 'joao123')">
+                        <div class="demo-user-info">
+                            <div class="demo-email">joao@empresa.com</div>
+                            <div class="demo-password">joao123</div>
+                        </div>
+                        <div class="demo-badge badge-gerente">Gerente</div>
+                    </div>
+
+                    <div class="demo-user" onclick="fillLogin('maria@empresa.com', 'maria123')">
+                        <div class="demo-user-info">
+                            <div class="demo-email">maria@empresa.com</div>
+                            <div class="demo-password">maria123</div>
+                        </div>
+                        <div class="demo-badge badge-usuario">Usuário</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Clique em qualquer usuário acima para testar
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURAÇÃO DO SUPABASE
+        const SUPABASE_URL = 'https://bfmsnvaadrlhlofmlprt.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmbXNudmFhZHJsaGxvZm1scHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExMjkxODgsImV4cCI6MjA2NjcwNTE4OH0.LPipIRVv2yZH3pTb6Zdz2Jqj7pQ1X5mjZ4ikF_R_Fik';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Elementos DOM
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const senhaInput = document.getElementById('senha');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginText = document.getElementById('loginText');
+        const notification = document.getElementById('notification');
+
+        // Função para mostrar notificações
+        function showNotification(text, type = 'error') {
+            notification.innerHTML = text;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        // Função para preencher login (demo)
+        function fillLogin(email, senha) {
+            emailInput.value = email;
+            senhaInput.value = senha;
+            emailInput.focus();
+        }
+
+        // Função principal de login
+        async function realizarLogin(email, senha) {
+            try {
+                console.log('🔍 Tentando login:', email);
+                
+                // Buscar usuário no Supabase
+                const { data: usuario, error } = await supabaseClient
+                    .from('usuarios')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('senha', senha)
+                    .eq('ativo', true)
+                    .single();
+
+                if (error) {
+                    console.error('❌ Erro Supabase:', error);
+                    throw new Error('Email ou senha incorretos');
+                }
+
+                if (!usuario) {
+                    console.log('❌ Usuário não encontrado');
+                    throw new Error('Email ou senha incorretos');
+                }
+
+                console.log('✅ Login bem-sucedido:', usuario);
+
+                // Salvar dados do usuário
+                const dadosUsuario = {
+                    id: usuario.id,
+                    nome: usuario.nome,
+                    email: usuario.email,
+                    cargo: usuario.cargo,
+                    loginEm: new Date().toISOString()
+                };
+
+                localStorage.setItem('usuarioLogado', JSON.stringify(dadosUsuario));
+                
+                showNotification(`✅ Bem-vindo, ${usuario.nome}! Redirecionando...`, 'success');
+                
+                // Redirecionar
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('❌ Erro no login:', error);
+                showNotification(error.message || '❌ Erro ao fazer login');
+            }
+        }
+
+        // Event listener do formulário
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = emailInput.value.trim();
+            const senha = senhaInput.value.trim();
+
+            if (!email || !senha) {
+                showNotification('⚠️ Preencha todos os campos');
+                return;
+            }
+
+            // Mostrar loading
+            loginBtn.disabled = true;
+            loginText.innerHTML = '<div class="loading-spinner"></div>';
+            
+            await realizarLogin(email, senha);
+
+            // Resetar botão
+            loginBtn.disabled = false;
+            loginText.textContent = 'Entrar';
+        });
+
+        // Verificar se já está logado
+        window.addEventListener('DOMContentLoaded', () => {
+            const usuarioLogado = localStorage.getItem('usuarioLogado');
+            if (usuarioLogado) {
+                try {
+                    const dados = JSON.parse(usuarioLogado);
+                    showNotification(`Você já está logado como ${dados.nome}! Redirecionando...`, 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } catch (error) {
+                    localStorage.removeItem('usuarioLogado');
+                }
+            }
+        });
+
+        // Melhorar UX com teclado
+        emailInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                senhaInput.focus();
+            }
+        });
+
+        senhaInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loginForm.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>
