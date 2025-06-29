@@ -509,6 +509,11 @@
             font-weight: 500;
         }
 
+        .user-role.gerente {
+            color: #f59e0b;
+            font-weight: 500;
+        }
+
         .menu-arrow {
             font-size: 0.7rem;
             color: #6b7280;
@@ -586,6 +591,17 @@
             letter-spacing: 0.05em;
         }
 
+        .gerente-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 16px;
@@ -630,12 +646,12 @@
         </div>
 
         <!-- Estatísticas -->
-        <div class="stats-grid">
+        <div class="stats-grid" id="statsGrid">
             <div class="stat-card">
                 <div class="stat-label">Total de Produtos</div>
                 <div class="stat-value" id="totalProducts">-</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" id="valueCard">
                 <div class="stat-label">Valor Total</div>
                 <div class="stat-value highlight" id="totalValue">R$ 0,00</div>
             </div>
@@ -792,7 +808,7 @@
             
             const permissoes = {
                 'admin': ['criar', 'editar', 'deletar', 'visualizar', 'gerenciar'],
-                'gerente': ['criar', 'editar', 'visualizar'],
+                'gerente': ['editar', 'visualizar'],
                 'usuario': ['visualizar']
             };
             
@@ -812,6 +828,28 @@
             
             const userInfo = document.createElement('div');
             userInfo.className = 'user-info';
+            
+            let menuItems = '';
+            if (usuarioAtual.cargo === 'admin') {
+                menuItems = `
+                    <a href="admin.html" class="dropdown-item admin-only">
+                        <span class="dropdown-icon">📦</span>
+                        Gerenciar Produtos
+                    </a>
+                    <a href="admin.html#users" class="dropdown-item admin-only">
+                        <span class="dropdown-icon">👥</span>
+                        Gerenciar Usuários
+                    </a>
+                `;
+            } else if (usuarioAtual.cargo === 'gerente') {
+                menuItems = `
+                    <a href="admin.html" class="dropdown-item admin-only">
+                        <span class="dropdown-icon">📦</span>
+                        Gerenciar Produtos
+                    </a>
+                `;
+            }
+            
             userInfo.innerHTML = `
                 <div class="user-menu" id="userMenu">
                     <div class="user-button" onclick="toggleUserMenu()">
@@ -823,22 +861,14 @@
                             <div class="user-role ${usuarioAtual.cargo}">
                                 ${usuarioAtual.cargo}
                                 ${usuarioAtual.cargo === 'admin' ? '<span class="admin-badge">Admin</span>' : ''}
+                                ${usuarioAtual.cargo === 'gerente' ? '<span class="gerente-badge">Gerente</span>' : ''}
                             </div>
                         </div>
                         <div class="menu-arrow">▼</div>
                     </div>
                     
                     <div class="user-dropdown" id="userDropdown">
-                        ${usuarioAtual.cargo === 'admin' ? `
-                            <a href="admin.html" class="dropdown-item admin-only">
-                                <span class="dropdown-icon">📦</span>
-                                Gerenciar Produtos
-                            </a>
-                            <a href="admin.html#users" class="dropdown-item admin-only">
-                                <span class="dropdown-icon">👥</span>
-                                Gerenciar Usuários
-                            </a>
-                        ` : ''}
+                        ${menuItems}
                         <div class="dropdown-item danger" onclick="logout()">
                             <span class="dropdown-icon">🚪</span>
                             Sair
@@ -870,7 +900,12 @@
 
         function configurarPermissoes() {
             if (!usuarioAtual) return;
-            // Permissões já são tratadas na renderização dos produtos
+            
+            // Ocultar valor total para usuários comuns
+            if (usuarioAtual.cargo === 'usuario') {
+                const valueCard = document.getElementById('valueCard');
+                if (valueCard) valueCard.style.display = 'none';
+            }
         }
 
         // Funções utilitárias
@@ -942,7 +977,9 @@
             const filtered = filteredProducts.length;
 
             totalProducts.textContent = total;
-            totalValue.textContent = formatCurrency(totalVal);
+            if (usuarioAtual.cargo !== 'usuario') {
+                totalValue.textContent = formatCurrency(totalVal);
+            }
             lowStock.textContent = lowStockCount;
             filteredCount.textContent = filtered;
 
@@ -1137,7 +1174,7 @@
                             <div class="detail-value price">
                                 ${editingProductId === product.id ? 
                                     `<input type="number" step="0.01" class="detail-input" id="edit-valor" value="${product.valor}">` :
-                                    formatCurrency(product.valor)
+                                    (usuarioAtual.cargo !== 'usuario' ? formatCurrency(product.valor) : 'Restrito')
                                 }
                             </div>
                         </div>
@@ -1245,7 +1282,7 @@
                 'Área Útil': p.area_util,
                 Categoria: p.categoria,
                 Estoque: p.estoque,
-                Valor: p.valor
+                Valor: usuarioAtual.cargo !== 'usuario' ? p.valor : 'Restrito'
             }));
 
             const ws = XLSX.utils.json_to_sheet(data);
@@ -1274,8 +1311,12 @@
                 
                 doc.text(`ID: ${product.id} | ${product.tipo}`, 20, y);
                 doc.text(`Categoria: ${product.categoria} | Estoque: ${product.estoque}`, 20, y + 10);
-                doc.text(`Valor: ${formatCurrency(product.valor)}`, 20, y + 20);
-                y += 35;
+                if (usuarioAtual.cargo !== 'usuario') {
+                    doc.text(`Valor: ${formatCurrency(product.valor)}`, 20, y + 20);
+                    y += 35;
+                } else {
+                    y += 25;
+                }
             });
             
             doc.save(`estoque_${new Date().toISOString().split('T')[0]}.pdf`);
