@@ -57,6 +57,18 @@
             font-weight: 500;
         }
 
+        .gerente-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
         .back-btn {
             position: absolute;
             top: 20px;
@@ -423,9 +435,9 @@
                 ← Voltar ao Sistema
             </a>
             
-            <h1>🔧 Painel Administrativo</h1>
-            <p>Área exclusiva para administradores</p>
-            <div class="admin-badge">
+            <h1 id="pageTitle">🔧 Painel Administrativo</h1>
+            <p id="pageSubtitle">Área exclusiva para administradores</p>
+            <div id="accessBadge" class="admin-badge">
                 👑 Acesso Administrativo
             </div>
         </div>
@@ -436,7 +448,7 @@
                 <button class="tab active" onclick="showTab('products')">
                     📦 Gerenciar Produtos
                 </button>
-                <button class="tab" onclick="showTab('users')">
+                <button id="usersTab" class="tab" onclick="showTab('users')">
                     👥 Gerenciar Usuários
                 </button>
             </div>
@@ -601,6 +613,7 @@
 
         let users = [];
         let editingUserId = null;
+        let usuarioAtual = null;
 
         // Elementos DOM
         const notification = document.getElementById('notification');
@@ -610,27 +623,69 @@
         const editUserModal = document.getElementById('editUserModal');
         const usersTableBody = document.getElementById('usersTableBody');
 
-        // Verificar se usuário é admin
+        // Verificar se usuário é admin OU gerente
         function verificarAdmin() {
             const usuarioLogado = localStorage.getItem('usuarioLogado');
             
             if (!usuarioLogado) {
                 window.location.href = 'login.html';
-                return false;
+                return null;
             }
             
             try {
                 const dados = JSON.parse(usuarioLogado);
-                if (dados.cargo !== 'admin') {
-                    alert('Acesso negado! Apenas administradores podem acessar esta área.');
-                    window.location.href = 'index.html';
-                    return false;
+                
+                // Verificar se o usuário tem dados válidos
+                if (!dados || !dados.cargo || !dados.nome || !dados.email) {
+                    console.error('Dados de usuário inválidos');
+                    localStorage.removeItem('usuarioLogado');
+                    window.location.href = 'login.html';
+                    return null;
                 }
-                return true;
+                
+                // Permitir acesso para admin E gerente
+                if (dados.cargo !== 'admin' && dados.cargo !== 'gerente') {
+                    alert('Acesso negado! Apenas administradores e gerentes podem acessar esta área.');
+                    window.location.href = 'index.html';
+                    return null;
+                }
+                
+                return dados; // Retornar os dados do usuário
             } catch (error) {
+                console.error('Erro ao verificar usuário:', error);
                 localStorage.removeItem('usuarioLogado');
                 window.location.href = 'login.html';
-                return false;
+                return null;
+            }
+        }
+
+        // Configurar permissões baseadas no cargo
+        function configurarPermissoesAdmin(usuario) {
+            if (!usuario || !usuario.cargo) {
+                console.error('Dados de usuário inválidos para configurar permissões');
+                return;
+            }
+            
+            usuarioAtual = usuario;
+            
+            // Se for gerente, ocultar a tab de usuários e ajustar interface
+            if (usuario.cargo === 'gerente') {
+                const usersTab = document.getElementById('usersTab');
+                if (usersTab) {
+                    usersTab.style.display = 'none';
+                }
+                
+                // Atualizar o título da página
+                const pageTitle = document.getElementById('pageTitle');
+                const pageSubtitle = document.getElementById('pageSubtitle');
+                const accessBadge = document.getElementById('accessBadge');
+                
+                if (pageTitle) pageTitle.innerHTML = '📦 Gerenciar Produtos';
+                if (pageSubtitle) pageSubtitle.textContent = 'Área para gerenciamento de produtos';
+                if (accessBadge) {
+                    accessBadge.className = 'gerente-badge';
+                    accessBadge.innerHTML = '👨‍💼 Acesso de Gerente';
+                }
             }
         }
 
@@ -645,6 +700,12 @@
 
         // Funções de navegação entre tabs
         function showTab(tabName) {
+            // Verificar permissões para tab de usuários
+            if (tabName === 'users' && usuarioAtual && usuarioAtual.cargo !== 'admin') {
+                showNotification('Apenas administradores podem gerenciar usuários', 'error');
+                return;
+            }
+
             // Remover classe active de todas as tabs
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
@@ -685,6 +746,11 @@
         // ===== FUNÇÕES DE USUÁRIOS =====
 
         async function loadUsers() {
+            // Apenas admins podem carregar usuários
+            if (!usuarioAtual || usuarioAtual.cargo !== 'admin') {
+                return;
+            }
+
             try {
                 const { data, error } = await supabaseClient
                     .from('usuarios')
@@ -746,6 +812,12 @@
         }
 
         async function addUser(data) {
+            // Apenas admins podem adicionar usuários
+            if (!usuarioAtual || usuarioAtual.cargo !== 'admin') {
+                showNotification('Apenas administradores podem adicionar usuários', 'error');
+                return;
+            }
+
             try {
                 const { error } = await supabaseClient
                     .from('usuarios')
@@ -764,6 +836,12 @@
         }
 
         function editUser(userId) {
+            // Apenas admins podem editar usuários
+            if (!usuarioAtual || usuarioAtual.cargo !== 'admin') {
+                showNotification('Apenas administradores podem editar usuários', 'error');
+                return;
+            }
+
             const user = users.find(u => u.id === userId);
             if (!user) return;
 
@@ -782,6 +860,12 @@
         }
 
         async function updateUser(userId, data) {
+            // Apenas admins podem atualizar usuários
+            if (!usuarioAtual || usuarioAtual.cargo !== 'admin') {
+                showNotification('Apenas administradores podem atualizar usuários', 'error');
+                return;
+            }
+
             try {
                 const { error } = await supabaseClient
                     .from('usuarios')
@@ -801,6 +885,12 @@
         }
 
         async function toggleUserStatus(userId, newStatus) {
+            // Apenas admins podem alterar status
+            if (!usuarioAtual || usuarioAtual.cargo !== 'admin') {
+                showNotification('Apenas administradores podem alterar status de usuários', 'error');
+                return;
+            }
+
             try {
                 const { error } = await supabaseClient
                     .from('usuarios')
@@ -871,9 +961,19 @@
 
         // Inicializar
         window.addEventListener('DOMContentLoaded', () => {
-            if (verificarAdmin()) {
-                console.log('✅ Acesso administrativo autorizado');
-                loadUsers();
+            console.log('🔍 Verificando acesso ao painel admin...');
+            
+            const usuario = verificarAdmin();
+            if (usuario) {
+                console.log('✅ Acesso autorizado:', usuario.nome, '(' + usuario.cargo + ')');
+                configurarPermissoesAdmin(usuario);
+                
+                // Só carregar usuários se for admin
+                if (usuario.cargo === 'admin') {
+                    loadUsers();
+                }
+            } else {
+                console.log('❌ Acesso negado - redirecionando...');
             }
         });
     </script>
