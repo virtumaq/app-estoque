@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Sistema de Estoque</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fb;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #5856eb;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f8fafc;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .card-content {
+            padding: 24px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #6366f1;
+            border-bottom-color: #6366f1;
+        }
+
+        .tab:hover {
+            color: #374151;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.05);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5856eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .add-product-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .users-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .users-table td {
+            font-size: 0.9rem;
+        }
+
+        .users-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .user-badge {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-admin {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-gerente {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-usuario {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-ativo {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-inativo {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 320px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-color: #10b981;
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .notification.error {
+            border-color: #ef4444;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .modal h3 {
+            font-size: 1.2rem;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header {
+                padding: 20px 0;
+            }
+
+            .back-btn {
+                position: relative;
+                top: auto;
+                left: auto;
+                margin-bottom: 20px;
+            }
+
+            .add-product-form {
+                grid-template-columns: 1fr;
+            }
+
+            .users-table {
+                font-size: 0.8rem;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="index.html" class="back-btn">
+                ← Voltar ao Sistema
+            </a>
+            
+            <h1>🔧 Painel Administrativo</h1>
+            <p>Área exclusiva para administradores</p>
+            <div class="admin-badge">
+                👑 Acesso Administrativo
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="card">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('products')">
+                    📦 Gerenciar Produtos
+                </button>
+                <button class="tab" onclick="showTab('users')">
+                    👥 Gerenciar Usuários
+                </button>
+            </div>
+
+            <!-- Tab: Produtos -->
+            <div id="products-tab" class="tab-content active">
+                <div class="card-header">
+                    <div class="card-title">Adicionar Novo Produto</div>
+                    <div class="card-subtitle">Cadastre produtos no sistema de estoque</div>
+                </div>
+                <div class="card-content">
+                    <form id="productForm">
+                        <div class="add-product-form">
+                            <div class="form-group">
+                                <label class="form-label">ID do Produto</label>
+                                <input type="text" id="id" class="form-input" required placeholder="Ex: VTF100">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Tipo</label>
+                                <input type="text" id="tipo" class="form-input" required placeholder="Ex: Fiber Mini">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Potência</label>
+                                <input type="text" id="potencia" class="form-input" required placeholder="Ex: 100w">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Área Útil</label>
+                                <input type="text" id="area_util" class="form-input" required placeholder="Ex: 300x300mm">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Categoria</label>
+                                <input type="text" id="categoria" class="form-input" required placeholder="Ex: Fiber Laser">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Estoque Inicial</label>
+                                <input type="number" id="estoque" class="form-input" required placeholder="Ex: 10">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Valor (R$)</label>
+                                <input type="number" id="valor" class="form-input" step="0.01" required placeholder="Ex: 60900.00">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            ✅ Adicionar Produto
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tab: Usuários -->
+            <div id="users-tab" class="tab-content">
+                <div class="card-header">
+                    <div class="card-title">Gerenciar Usuários</div>
+                    <div class="card-subtitle">Adicione e gerencie usuários do sistema</div>
+                </div>
+                <div class="card-content">
+                    <!-- Formulário Adicionar Usuário -->
+                    <form id="userForm">
+                        <div class="add-product-form">
+                            <div class="form-group">
+                                <label class="form-label">Nome Completo</label>
+                                <input type="text" id="user-nome" class="form-input" required placeholder="Ex: João Silva">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" id="user-email" class="form-input" required placeholder="joao@empresa.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Senha</label>
+                                <input type="password" id="user-senha" class="form-input" required placeholder="Digite uma senha">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Cargo</label>
+                                <select id="user-cargo" class="form-select" required>
+                                    <option value="">Selecione um cargo</option>
+                                    <option value="admin">Administrador</option>
+                                    <option value="gerente">Gerente</option>
+                                    <option value="usuario">Usuário</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            👤 Adicionar Usuário
+                        </button>
+                    </form>
+
+                    <!-- Lista de Usuários -->
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Cargo</th>
+                                <th>Status</th>
+                                <th>Criado em</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #6b7280;">
+                                    Carregando usuários...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Usuário -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <h3>Editar Usuário</h3>
+            <form id="editUserForm">
+                <div class="form-group">
+                    <label class="form-label">Nome</label>
+                    <input type="text" id="edit-user-nome" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="edit-user-email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Cargo</label>
+                    <select id="edit-user-cargo" class="form-select" required>
+                        <option value="admin">Administrador</option>
+                        <option value="gerente">Gerente</option>
+                        <option value="usuario">Usuário</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select id="edit-user-ativo" class="form-select" required>
+                        <option value="true">Ativo</option>
+                        <option value="false">Inativo</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notificação -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // CONFIGURAÇÃO DO SUPABASE
+        const SUPABASE_URL = 'https://bfmsnvaadrlhlofmlprt.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmbXNudmFhZHJsaGxvZm1scHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExMjkxODgsImV4cCI6MjA2NjcwNTE4OH0.LPipIRVv2yZH3pTb6Zdz2Jqj7pQ1X5mjZ4ikF_R_Fik';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let users = [];
+        let editingUserId = null;
+
+        // Elementos DOM
+        const notification = document.getElementById('notification');
+        const productForm = document.getElementById('productForm');
+        const userForm = document.getElementById('userForm');
+        const editUserForm = document.getElementById('editUserForm');
+        const editUserModal = document.getElementById('editUserModal');
+        const usersTableBody = document.getElementById('usersTableBody');
+
+        // Verificar se usuário é admin
+        function verificarAdmin() {
+            const usuarioLogado = localStorage.getItem('usuarioLogado');
+            
+            if (!usuarioLogado) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            try {
+                const dados = JSON.parse(usuarioLogado);
+                if (dados.cargo !== 'admin') {
+                    alert('Acesso negado! Apenas administradores podem acessar esta área.');
+                    window.location.href = 'index.html';
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                localStorage.removeItem('usuarioLogado');
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
+        // Função para mostrar notificações
+        function showNotification(text, type = 'success') {
+            notification.innerHTML = text;
+            notification.className = `notification ${type} show`;
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Funções de navegação entre tabs
+        function showTab(tabName) {
+            // Remover classe active de todas as tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Ativar tab selecionada
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+
+            // Carregar dados se necessário
+            if (tabName === 'users') {
+                loadUsers();
+            }
+        }
+
+        // ===== FUNÇÕES DE PRODUTOS =====
+
+        async function addProduct(data) {
+            try {
+                const { error } = await supabaseClient
+                    .from('produtos')
+                    .insert([data]);
+
+                if (error) throw error;
+
+                showNotification('✅ Produto adicionado com sucesso!', 'success');
+                productForm.reset();
+
+            } catch (error) {
+                console.error('Erro ao adicionar produto:', error);
+                showNotification(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // ===== FUNÇÕES DE USUÁRIOS =====
+
+        async function loadUsers() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('usuarios')
+                    .select('*')
+                    .order('criado_em', { ascending: false });
+
+                if (error) throw error;
+
+                users = data || [];
+                renderUsers();
+
+            } catch (error) {
+                console.error('Erro ao carregar usuários:', error);
+                showNotification(`❌ Erro ao carregar usuários: ${error.message}`, 'error');
+            }
+        }
+
+        function renderUsers() {
+            if (users.length === 0) {
+                usersTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #6b7280;">
+                            Nenhum usuário encontrado
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const html = users.map(user => `
+                <tr>
+                    <td>${user.nome}</td>
+                    <td>${user.email}</td>
+                    <td>
+                        <span class="user-badge badge-${user.cargo}">
+                            ${user.cargo}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge ${user.ativo ? 'status-ativo' : 'status-inativo'}">
+                            ${user.ativo ? 'Ativo' : 'Inativo'}
+                        </span>
+                    </td>
+                    <td>${new Date(user.criado_em).toLocaleDateString('pt-BR')}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-small" onclick="editUser(${user.id})">
+                            ✏️ Editar
+                        </button>
+                        ${user.cargo !== 'admin' ? `
+                            <button class="btn btn-danger btn-small" onclick="toggleUserStatus(${user.id}, ${!user.ativo})">
+                                ${user.ativo ? '🚫 Desativar' : '✅ Ativar'}
+                            </button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+
+            usersTableBody.innerHTML = html;
+        }
+
+        async function addUser(data) {
+            try {
+                const { error } = await supabaseClient
+                    .from('usuarios')
+                    .insert([data]);
+
+                if (error) throw error;
+
+                showNotification('✅ Usuário adicionado com sucesso!', 'success');
+                userForm.reset();
+                loadUsers();
+
+            } catch (error) {
+                console.error('Erro ao adicionar usuário:', error);
+                showNotification(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+
+            editingUserId = userId;
+            document.getElementById('edit-user-nome').value = user.nome;
+            document.getElementById('edit-user-email').value = user.email;
+            document.getElementById('edit-user-cargo').value = user.cargo;
+            document.getElementById('edit-user-ativo').value = user.ativo.toString();
+
+            editUserModal.classList.add('show');
+        }
+
+        function closeEditModal() {
+            editUserModal.classList.remove('show');
+            editingUserId = null;
+        }
+
+        async function updateUser(userId, data) {
+            try {
+                const { error } = await supabaseClient
+                    .from('usuarios')
+                    .update(data)
+                    .eq('id', userId);
+
+                if (error) throw error;
+
+                showNotification('✅ Usuário atualizado com sucesso!', 'success');
+                closeEditModal();
+                loadUsers();
+
+            } catch (error) {
+                console.error('Erro ao atualizar usuário:', error);
+                showNotification(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        async function toggleUserStatus(userId, newStatus) {
+            try {
+                const { error } = await supabaseClient
+                    .from('usuarios')
+                    .update({ ativo: newStatus })
+                    .eq('id', userId);
+
+                if (error) throw error;
+
+                showNotification(`✅ Usuário ${newStatus ? 'ativado' : 'desativado'} com sucesso!`, 'success');
+                loadUsers();
+
+            } catch (error) {
+                console.error('Erro ao alterar status:', error);
+                showNotification(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Event Listeners
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                id: document.getElementById('id').value.trim(),
+                tipo: document.getElementById('tipo').value.trim(),
+                potencia: document.getElementById('potencia').value.trim(),
+                area_util: document.getElementById('area_util').value.trim(),
+                categoria: document.getElementById('categoria').value.trim(),
+                estoque: parseInt(document.getElementById('estoque').value),
+                valor: parseFloat(document.getElementById('valor').value)
+            };
+
+            await addProduct(data);
+        });
+
+        userForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                nome: document.getElementById('user-nome').value.trim(),
+                email: document.getElementById('user-email').value.trim(),
+                senha: document.getElementById('user-senha').value.trim(),
+                cargo: document.getElementById('user-cargo').value,
+                ativo: true
+            };
+
+            await addUser(data);
+        });
+
+        editUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                nome: document.getElementById('edit-user-nome').value.trim(),
+                email: document.getElementById('edit-user-email').value.trim(),
+                cargo: document.getElementById('edit-user-cargo').value,
+                ativo: document.getElementById('edit-user-ativo').value === 'true'
+            };
+
+            await updateUser(editingUserId, data);
+        });
+
+        // Fechar modal ao clicar fora
+        editUserModal.addEventListener('click', (e) => {
+            if (e.target === editUserModal) {
+                closeEditModal();
+            }
+        });
+
+        // Inicializar
+        window.addEventListener('DOMContentLoaded', () => {
+            if (verificarAdmin()) {
+                console.log('✅ Acesso administrativo autorizado');
+                loadUsers();
+            }
+        });
+    </script>
+</body>
+</html>
