@@ -634,7 +634,7 @@
             <div class="tab active" onclick="showTab('products')">
                 📦 Gerenciar Produtos
             </div>
-            <div class="tab" onclick="showTab('users')" id="usersTab" style="display: none;">
+            <div class="tab" onclick="showTab('users')" id="usersTabButton">
                 👥 Gerenciar Usuários
             </div>
         </div>
@@ -707,7 +707,7 @@
         </div>
 
         <!-- Usuários Tab -->
-        <div id="usersTab" class="tab-content">
+        <div id="usersTabContent" class="tab-content">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Gerenciar Usuários</div>
@@ -874,9 +874,15 @@
             if (!usuarioAtual) return;
             
             // Mostrar tab de usuários apenas para admin
+            const usersTabButton = document.getElementById('usersTabButton');
             if (usuarioAtual.cargo === 'admin') {
-                document.getElementById('usersTab').style.display = 'block';
+                usersTabButton.style.display = 'block';
+            } else {
+                usersTabButton.style.display = 'none';
             }
+            
+            console.log('👤 Configurando permissões para:', usuarioAtual.cargo);
+            console.log('📋 Tab de usuários visível:', usuarioAtual.cargo === 'admin');
         }
 
         // Funções utilitárias
@@ -909,7 +915,12 @@
             
             // Adicionar classe active à tab selecionada
             event.target.classList.add('active');
-            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            if (tabName === 'products') {
+                document.getElementById('productsTab').classList.add('active');
+            } else if (tabName === 'users') {
+                document.getElementById('usersTabContent').classList.add('active');
+            }
         }
 
         // Busca de produtos
