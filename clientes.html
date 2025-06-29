@@ -288,6 +288,14 @@
                 align-items: stretch;
                 gap: 16px;
             }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
@@ -307,16 +315,78 @@
             </div>
         </div>
 
+        <!-- Estatísticas -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-label">Total de Clientes</div>
+                <div class="stat-value" id="totalClientes">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pessoa Física</div>
+                <div class="stat-value highlight" id="totalPF">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pessoa Jurídica</div>
+                <div class="stat-value highlight" id="totalPJ">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cadastrados Hoje</div>
+                <div class="stat-value" id="clientesHoje">-</div>
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title-group">
+                    <div class="card-title">Filtros e Ações</div>
+                    <div class="card-subtitle">Busque clientes ou adicione novos cadastros</div>
+                </div>
+                <a href="cadastro-cliente.html" class="btn btn-success" id="addClienteBtn">
+                    ➕ Novo Cliente
+                </a>
+            </div>
+            <div class="card-content">
+                <div class="controls">
+                    <div class="form-group">
+                        <label class="form-label">Buscar cliente</label>
+                        <input type="text" id="searchInput" class="form-input" placeholder="Nome, código, documento...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tipo</label>
+                        <select id="tipoFilter" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="PF">Pessoa Física</option>
+                            <option value="PJ">Pessoa Jurídica</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select id="statusFilter" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="ativo">Ativo</option>
+                            <option value="inativo">Inativo</option>
+                            <option value="bloqueado">Bloqueado</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary btn-small" onclick="exportToExcel()">📊 Excel</button>
+                        <button class="btn btn-secondary btn-small" onclick="exportToPDF()">📄 PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Lista de Clientes -->
         <div class="card">
             <div class="card-header">
                 <div class="card-title-group">
                     <div class="card-title">Clientes Cadastrados</div>
-                    <div class="card-subtitle">Total: <span id="totalClientes">0</span> clientes</div>
+                    <div class="card-subtitle">Gerencie todos os seus clientes</div>
                 </div>
-                <a href="cadastro-cliente.html" class="btn btn-success" id="addClienteBtn">
-                    ➕ Novo Cliente
-                </a>
             </div>
             <div class="card-content">
                 <div id="clientesContainer" class="clientes-grid">
@@ -345,9 +415,15 @@
 
         // Elementos DOM
         const totalClientes = document.getElementById('totalClientes');
+        const totalPF = document.getElementById('totalPF');
+        const totalPJ = document.getElementById('totalPJ');
+        const clientesHoje = document.getElementById('clientesHoje');
         const clientesContainer = document.getElementById('clientesContainer');
         const connectionStatus = document.getElementById('connectionStatus');
         const notification = document.getElementById('notification');
+        const searchInput = document.getElementById('searchInput');
+        const tipoFilter = document.getElementById('tipoFilter');
+        const statusFilter = document.getElementById('statusFilter');
 
         // Função para mostrar notificações
         function showNotification(text, type = 'success') {
@@ -389,6 +465,46 @@
             }
             
             return phone;
+        }
+
+        // Atualizar estatísticas
+        function updateStats() {
+            const total = clientes.length;
+            const totalPessaoFisica = clientes.filter(c => c.tipo_cliente === 'PF').length;
+            const totalPessaoJuridica = clientes.filter(c => c.tipo_cliente === 'PJ').length;
+            
+            // Calcular clientes cadastrados hoje
+            const hoje = new Date().toDateString();
+            const clientesHojeCount = clientes.filter(c => {
+                const dataCliente = new Date(c.data_cadastro).toDateString();
+                return dataCliente === hoje;
+            }).length;
+
+            totalClientes.textContent = total;
+            totalPF.textContent = totalPessaoFisica;
+            totalPJ.textContent = totalPessaoJuridica;
+            clientesHoje.textContent = clientesHojeCount;
+        }
+
+        // Filtros e busca
+        function applyFilters() {
+            // Por enquanto só renderiza todos os clientes
+            // Implementaremos filtros mais tarde se necessário
+            renderClientes();
+        }
+
+        // Event listeners para filtros
+        if (searchInput) searchInput.addEventListener('input', applyFilters);
+        if (tipoFilter) tipoFilter.addEventListener('change', applyFilters);
+        if (statusFilter) statusFilter.addEventListener('change', applyFilters);
+
+        // Funções de exportação (básicas por enquanto)
+        function exportToExcel() {
+            showNotification('Função de exportação será implementada em breve', 'success');
+        }
+
+        function exportToPDF() {
+            showNotification('Função de exportação será implementada em breve', 'success');
         }
 
         // Renderizar clientes
@@ -490,6 +606,7 @@
 
                 clientes = data || [];
                 totalClientes.textContent = clientes.length;
+                updateStats();
                 renderClientes();
                 connectionStatus.textContent = 'Sistema ativo';
                 
