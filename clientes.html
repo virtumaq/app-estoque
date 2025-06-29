@@ -401,10 +401,17 @@
 
             .controls {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
 
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+
+            .card-header {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 16px;
             }
         }
     </style>
@@ -445,18 +452,16 @@
             </div>
         </div>
 
-        <!-- Botão Novo Cliente -->
-        <div style="margin-bottom: 24px; text-align: center;">
-            <a href="cadastro-cliente.html" class="btn btn-success" style="text-decoration: none !important;">
-                ➕ Novo Cliente
-            </a>
-        </div>
-
         <!-- Controles -->
         <div class="card">
-            <div class="card-header">
-                <div class="card-title">Filtros e Controles</div>
-                <div class="card-subtitle">Busque e filtre clientes ou exporte relatórios</div>
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div class="card-title">Filtros e Controles</div>
+                    <div class="card-subtitle">Busque e filtre clientes cadastrados</div>
+                </div>
+                <a href="cadastro-cliente.html" class="btn btn-success" style="text-decoration: none !important;">
+                    ➕ Novo Cliente
+                </a>
             </div>
             <div class="card-content">
                 <div class="controls">
@@ -475,18 +480,24 @@
                     </div>
                     
                     <div class="form-group">
+                        <label class="form-label">Período</label>
+                        <select id="periodoFilter" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="hoje">Cadastrados Hoje</option>
+                            <option value="semana">Última Semana</option>
+                            <option value="mes">Último Mês</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
                         <label class="form-label">Status</label>
                         <select id="statusFilter" class="form-select">
                             <option value="">Todos</option>
                             <option value="ativo">Ativo</option>
                             <option value="inativo">Inativo</option>
                             <option value="bloqueado">Bloqueado</option>
+                            <option value="restricoes">Com Restrições</option>
                         </select>
-                    </div>
-                    
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-secondary btn-small" onclick="exportToExcel()">Excel</button>
-                        <button class="btn btn-secondary btn-small" onclick="exportToPDF()">PDF</button>
                     </div>
                 </div>
             </div>
@@ -535,6 +546,7 @@
         const notification = document.getElementById('notification');
         const searchInput = document.getElementById('searchInput');
         const tipoFilter = document.getElementById('tipoFilter');
+        const periodoFilter = document.getElementById('periodoFilter');
         const statusFilter = document.getElementById('statusFilter');
 
         // Função para mostrar notificações
@@ -615,7 +627,8 @@
         function applyFilters() {
             const searchTerm = searchInput.value.toLowerCase().trim();
             const tipoValue = tipoFilter.value;
-            const statusValue = statusFilter.value; // Para uso futuro
+            const periodoValue = periodoFilter.value;
+            const statusValue = statusFilter.value;
 
             filteredClientes = clientes.filter(cliente => {
                 // Filtro de busca
@@ -637,10 +650,38 @@
                 // Filtro de tipo
                 const matchesTipo = !tipoValue || cliente.tipo_cliente === tipoValue;
 
-                // Filtro de status (preparado para futuro uso)
-                const matchesStatus = true; // Por enquanto todos são ativos
+                // Filtro de período
+                let matchesPeriodo = true;
+                if (periodoValue) {
+                    const dataCliente = new Date(cliente.data_cadastro);
+                    const hoje = new Date();
+                    
+                    switch(periodoValue) {
+                        case 'hoje':
+                            matchesPeriodo = dataCliente.toDateString() === hoje.toDateString();
+                            break;
+                        case 'semana':
+                            const semanaAtras = new Date(hoje.getTime() - 7 * 24 * 60 * 60 * 1000);
+                            matchesPeriodo = dataCliente >= semanaAtras;
+                            break;
+                        case 'mes':
+                            const mesAtras = new Date(hoje.getTime() - 30 * 24 * 60 * 60 * 1000);
+                            matchesPeriodo = dataCliente >= mesAtras;
+                            break;
+                    }
+                }
 
-                return matchesSearch && matchesTipo && matchesStatus;
+                // Filtro de status (simulado por enquanto - todos são "ativo")
+                let matchesStatus = true;
+                if (statusValue) {
+                    // NOTA: Campo 'status' ainda não existe na tabela 'clientes'
+                    // Por enquanto todos os clientes são considerados "ativo"
+                    // Quando implementarmos o campo no banco, usaremos: cliente.status === statusValue
+                    const clienteStatus = cliente.status || 'ativo'; // Default: ativo
+                    matchesStatus = clienteStatus === statusValue;
+                }
+
+                return matchesSearch && matchesTipo && matchesPeriodo && matchesStatus;
             });
 
             renderClientes();
@@ -650,16 +691,8 @@
         // Event listeners para filtros
         if (searchInput) searchInput.addEventListener('input', applyFilters);
         if (tipoFilter) tipoFilter.addEventListener('change', applyFilters);
+        if (periodoFilter) periodoFilter.addEventListener('change', applyFilters);
         if (statusFilter) statusFilter.addEventListener('change', applyFilters);
-
-        // Funções de exportação (básicas por enquanto)
-        function exportToExcel() {
-            showNotification('Função de exportação será implementada em breve', 'success');
-        }
-
-        function exportToPDF() {
-            showNotification('Função de exportação será implementada em breve', 'success');
-        }
 
         // Função para editar cliente
         function editarCliente(clienteId) {
@@ -675,7 +708,7 @@
                 const isUsuarioComum = usuario && usuario.cargo === 'usuario';
                 
                 // Verificar se é resultado de filtro ou lista vazia
-                const isFiltered = searchInput.value.trim() || tipoFilter.value || statusFilter.value;
+                const isFiltered = searchInput.value.trim() || tipoFilter.value || periodoFilter.value || statusFilter.value;
                 
                 clientesContainer.innerHTML = `
                     <div class="empty-state">
