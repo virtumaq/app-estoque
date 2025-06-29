@@ -129,9 +129,27 @@
             margin-bottom: 24px;
         }
 
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
         .form-group {
             display: flex;
             flex-direction: column;
+        }
+
+        .form-group-full {
+            grid-column: 1 / -1;
         }
 
         .form-label {
@@ -190,6 +208,42 @@
             background: #f9fafb;
             color: #6b7280;
             cursor: not-allowed;
+        }
+
+        .form-textarea {
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.2s;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.05);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .checkbox-input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .checkbox-label {
+            font-size: 0.9rem;
+            color: #374151;
+            cursor: pointer;
         }
 
         .btn {
@@ -371,6 +425,24 @@
             justify-content: center;
         }
 
+        .section-header {
+            margin: 32px 0 16px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .section-subtitle {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 16px;
@@ -387,7 +459,7 @@
                 margin-bottom: 20px;
             }
 
-            .form-grid {
+            .form-grid, .form-grid-2, .form-grid-3 {
                 grid-template-columns: 1fr;
             }
 
@@ -422,21 +494,32 @@
         <div class="card">
             <div class="card-header">
                 <div class="card-title" id="cardTitle">Dados do Cliente</div>
-                <div class="card-subtitle" id="cardSubtitle">Preencha as informações do cliente</div>
+                <div class="card-subtitle" id="cardSubtitle">Preencha as informações completas do cliente</div>
             </div>
             <div class="card-content">
                 <form id="clienteForm">
-                    <!-- Tipo de Cliente -->
-                    <div class="form-group" style="margin-bottom: 24px;">
-                        <label class="form-label required">Tipo de Cliente</label>
-                        <select id="tipoCliente" class="form-select" required>
-                            <option value="">Selecione o tipo</option>
-                            <option value="PF">Pessoa Física</option>
-                            <option value="PJ">Pessoa Jurídica</option>
-                        </select>
+                    <!-- Dados Básicos -->
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label required">Tipo de Cliente</label>
+                            <select id="tipoCliente" class="form-select" required>
+                                <option value="">Selecione o tipo</option>
+                                <option value="PF">Pessoa Física</option>
+                                <option value="PJ">Pessoa Jurídica</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">Status</label>
+                            <select id="status" class="form-select" required>
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                                <option value="bloqueado">Bloqueado</option>
+                                <option value="restricoes">Com Restrições</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <!-- Dados Básicos -->
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label required" id="labelNome">Nome/Razão Social</label>
@@ -454,25 +537,19 @@
                             <div class="help-text" id="helpDocumento">Digite apenas números</div>
                         </div>
 
-                        <div class="form-group">
-                            <label class="form-label">Email Principal</label>
-                            <input type="email" id="emailPrincipal" class="form-input" placeholder="email@exemplo.com">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Telefone Principal</label>
-                            <input type="tel" id="telefonePrincipal" class="form-input" placeholder="(00) 00000-0000">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Cidade</label>
-                            <input type="text" id="cidadePrincipal" class="form-input" placeholder="Nome da cidade">
+                        <div class="form-group campo-condicional" id="campoDataNascFund">
+                            <label class="form-label" id="labelDataNascFund">Data de Nascimento</label>
+                            <input type="date" id="dataNascimentoFundacao" class="form-input">
                         </div>
                     </div>
 
-                    <!-- Campos Condicionais PJ -->
+                    <!-- Campos PJ -->
                     <div id="camposPJ" class="campo-condicional">
-                        <h3 style="margin: 24px 0 16px 0; color: #374151; font-size: 1.1rem;">Dados da Empresa</h3>
+                        <div class="section-header">
+                            <div class="section-title">Dados da Empresa</div>
+                            <div class="section-subtitle">Informações específicas para pessoa jurídica</div>
+                        </div>
+                        
                         <div class="form-grid">
                             <div class="form-group">
                                 <label class="form-label">Inscrição Estadual</label>
@@ -483,7 +560,218 @@
                                 <label class="form-label">Inscrição Municipal</label>
                                 <input type="text" id="inscricaoMunicipal" class="form-input" placeholder="IM (opcional)">
                             </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Contato Responsável</label>
+                                <input type="text" id="contatoResponsavel" class="form-input" placeholder="Nome do responsável">
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- Contatos -->
+                    <div class="section-header">
+                        <div class="section-title">Informações de Contato</div>
+                        <div class="section-subtitle">Dados para comunicação</div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Email Principal</label>
+                            <input type="email" id="emailPrincipal" class="form-input" placeholder="email@exemplo.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email Secundário</label>
+                            <input type="email" id="emailSecundario" class="form-input" placeholder="email2@exemplo.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Telefone Principal</label>
+                            <input type="tel" id="telefonePrincipal" class="form-input" placeholder="(00) 00000-0000">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Telefone Secundário</label>
+                            <input type="tel" id="telefoneSecundario" class="form-input" placeholder="(00) 00000-0000">
+                        </div>
+                    </div>
+
+                    <!-- Endereço Principal -->
+                    <div class="section-header">
+                        <div class="section-title">Endereço Principal</div>
+                        <div class="section-subtitle">Endereço da residência ou sede da empresa</div>
+                    </div>
+
+                    <div class="form-grid-3">
+                        <div class="form-group">
+                            <label class="form-label">CEP</label>
+                            <input type="text" id="cep" class="form-input" placeholder="00000-000" maxlength="9">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">UF</label>
+                            <select id="uf" class="form-select">
+                                <option value="">Selecione</option>
+                                <option value="AC">AC</option>
+                                <option value="AL">AL</option>
+                                <option value="AP">AP</option>
+                                <option value="AM">AM</option>
+                                <option value="BA">BA</option>
+                                <option value="CE">CE</option>
+                                <option value="DF">DF</option>
+                                <option value="ES">ES</option>
+                                <option value="GO">GO</option>
+                                <option value="MA">MA</option>
+                                <option value="MT">MT</option>
+                                <option value="MS">MS</option>
+                                <option value="MG">MG</option>
+                                <option value="PA">PA</option>
+                                <option value="PB">PB</option>
+                                <option value="PR">PR</option>
+                                <option value="PE">PE</option>
+                                <option value="PI">PI</option>
+                                <option value="RJ">RJ</option>
+                                <option value="RN">RN</option>
+                                <option value="RS">RS</option>
+                                <option value="RO">RO</option>
+                                <option value="RR">RR</option>
+                                <option value="SC">SC</option>
+                                <option value="SP">SP</option>
+                                <option value="SE">SE</option>
+                                <option value="TO">TO</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Cidade</label>
+                            <input type="text" id="cidadePrincipal" class="form-input" placeholder="Nome da cidade">
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Logradouro</label>
+                            <input type="text" id="logradouro" class="form-input" placeholder="Rua, Avenida, etc.">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Número</label>
+                            <input type="text" id="numero" class="form-input" placeholder="Número">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Complemento</label>
+                            <input type="text" id="complemento" class="form-input" placeholder="Apto, Sala, etc.">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Bairro</label>
+                            <input type="text" id="bairro" class="form-input" placeholder="Nome do bairro">
+                        </div>
+                    </div>
+
+                    <!-- Endereço de Entrega -->
+                    <div class="section-header">
+                        <div class="section-title">Endereço de Entrega</div>
+                        <div class="section-subtitle">Local para entrega de produtos</div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="enderecoEntregaIgual" class="checkbox-input" checked>
+                        <label for="enderecoEntregaIgual" class="checkbox-label">
+                            Endereço de entrega igual ao endereço principal
+                        </label>
+                    </div>
+
+                    <div id="camposEnderecoEntrega" style="display: none;">
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label class="form-label">CEP</label>
+                                <input type="text" id="cepEntrega" class="form-input" placeholder="00000-000" maxlength="9">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">UF</label>
+                                <select id="ufEntrega" class="form-select">
+                                    <option value="">Selecione</option>
+                                    <option value="AC">AC</option>
+                                    <option value="AL">AL</option>
+                                    <option value="AP">AP</option>
+                                    <option value="AM">AM</option>
+                                    <option value="BA">BA</option>
+                                    <option value="CE">CE</option>
+                                    <option value="DF">DF</option>
+                                    <option value="ES">ES</option>
+                                    <option value="GO">GO</option>
+                                    <option value="MA">MA</option>
+                                    <option value="MT">MT</option>
+                                    <option value="MS">MS</option>
+                                    <option value="MG">MG</option>
+                                    <option value="PA">PA</option>
+                                    <option value="PB">PB</option>
+                                    <option value="PR">PR</option>
+                                    <option value="PE">PE</option>
+                                    <option value="PI">PI</option>
+                                    <option value="RJ">RJ</option>
+                                    <option value="RN">RN</option>
+                                    <option value="RS">RS</option>
+                                    <option value="RO">RO</option>
+                                    <option value="RR">RR</option>
+                                    <option value="SC">SC</option>
+                                    <option value="SP">SP</option>
+                                    <option value="SE">SE</option>
+                                    <option value="TO">TO</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Cidade</label>
+                                <input type="text" id="cidadeEntrega" class="form-input" placeholder="Nome da cidade">
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Logradouro</label>
+                                <input type="text" id="logradouroEntrega" class="form-input" placeholder="Rua, Avenida, etc.">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Número</label>
+                                <input type="text" id="numeroEntrega" class="form-input" placeholder="Número">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Complemento</label>
+                                <input type="text" id="complementoEntrega" class="form-input" placeholder="Apto, Sala, etc.">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Bairro</label>
+                                <input type="text" id="bairroEntrega" class="form-input" placeholder="Nome do bairro">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comercial -->
+                    <div class="section-header">
+                        <div class="section-title">Informações Comerciais</div>
+                        <div class="section-subtitle">Dados para gestão comercial</div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Vendedor Responsável</label>
+                            <select id="vendedorResponsavel" class="form-select">
+                                <option value="">Selecione o vendedor</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Observações -->
+                    <div class="form-group form-group-full">
+                        <label class="form-label">Observações</label>
+                        <textarea id="observacoes" class="form-textarea" placeholder="Observações gerais sobre o cliente..."></textarea>
                     </div>
 
                     <!-- Ações -->
@@ -530,14 +818,43 @@
         // Elementos DOM
         const clienteForm = document.getElementById('clienteForm');
         const tipoCliente = document.getElementById('tipoCliente');
+        const status = document.getElementById('status');
         const nomeRazaoSocial = document.getElementById('nomeRazaoSocial');
         const nomeFantasia = document.getElementById('nomeFantasia');
         const documento = document.getElementById('documento');
+        const dataNascimentoFundacao = document.getElementById('dataNascimentoFundacao');
         const emailPrincipal = document.getElementById('emailPrincipal');
+        const emailSecundario = document.getElementById('emailSecundario');
         const telefonePrincipal = document.getElementById('telefonePrincipal');
-        const cidadePrincipal = document.getElementById('cidadePrincipal');
+        const telefoneSecundario = document.getElementById('telefoneSecundario');
         const inscricaoEstadual = document.getElementById('inscricaoEstadual');
         const inscricaoMunicipal = document.getElementById('inscricaoMunicipal');
+        const contatoResponsavel = document.getElementById('contatoResponsavel');
+        
+        // Endereço principal
+        const cep = document.getElementById('cep');
+        const uf = document.getElementById('uf');
+        const cidadePrincipal = document.getElementById('cidadePrincipal');
+        const logradouro = document.getElementById('logradouro');
+        const numero = document.getElementById('numero');
+        const complemento = document.getElementById('complemento');
+        const bairro = document.getElementById('bairro');
+        
+        // Endereço entrega
+        const enderecoEntregaIgual = document.getElementById('enderecoEntregaIgual');
+        const cepEntrega = document.getElementById('cepEntrega');
+        const ufEntrega = document.getElementById('ufEntrega');
+        const cidadeEntrega = document.getElementById('cidadeEntrega');
+        const logradouroEntrega = document.getElementById('logradouroEntrega');
+        const numeroEntrega = document.getElementById('numeroEntrega');
+        const complementoEntrega = document.getElementById('complementoEntrega');
+        const bairroEntrega = document.getElementById('bairroEntrega');
+        
+        // Comercial
+        const vendedorResponsavel = document.getElementById('vendedorResponsavel');
+        const observacoes = document.getElementById('observacoes');
+        
+        // Controles
         const submitBtn = document.getElementById('submitBtn');
         const submitText = document.getElementById('submitText');
         const deleteBtn = document.getElementById('deleteBtn');
@@ -619,6 +936,32 @@
             }, 4000);
         }
 
+        // Carregar vendedores
+        async function carregarVendedores() {
+            try {
+                const { data: vendedores, error } = await supabaseClient
+                    .from('usuarios')
+                    .select('id, nome, cargo')
+                    .in('cargo', ['admin', 'gerente', 'usuario'])
+                    .eq('ativo', true)
+                    .order('nome');
+
+                if (error) throw error;
+
+                vendedorResponsavel.innerHTML = '<option value="">Selecione o vendedor</option>';
+                vendedores.forEach(vendedor => {
+                    vendedorResponsavel.innerHTML += `
+                        <option value="${vendedor.id}">
+                            ${vendedor.nome} (${vendedor.cargo})
+                        </option>
+                    `;
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar vendedores:', error);
+            }
+        }
+
         // Carregar dados do cliente para edição
         async function carregarDadosCliente(id) {
             try {
@@ -663,11 +1006,19 @@
             // Disparar evento change para configurar campos
             tipoCliente.dispatchEvent(new Event('change'));
             
+            // Dados básicos
+            status.value = cliente.status || 'ativo';
             nomeRazaoSocial.value = cliente.nome_razao_social || '';
             nomeFantasia.value = cliente.nome_fantasia || '';
+            if (cliente.data_nascimento_fundacao) {
+                dataNascimentoFundacao.value = cliente.data_nascimento_fundacao;
+            }
+
+            // Contatos
             emailPrincipal.value = cliente.email_principal || '';
+            emailSecundario.value = cliente.email_secundario || '';
             telefonePrincipal.value = formatarTelefone(cliente.telefone_principal || '');
-            cidadePrincipal.value = cliente.cidade_principal || '';
+            telefoneSecundario.value = formatarTelefone(cliente.telefone_secundario || '');
 
             // Documento formatado
             const doc = cliente.tipo_cliente === 'PF' ? cliente.cpf : cliente.cnpj;
@@ -679,7 +1030,34 @@
             if (cliente.tipo_cliente === 'PJ') {
                 inscricaoEstadual.value = cliente.inscricao_estadual || '';
                 inscricaoMunicipal.value = cliente.inscricao_municipal || '';
+                contatoResponsavel.value = cliente.contato_responsavel || '';
             }
+
+            // Endereço principal
+            cep.value = formatarCEP(cliente.cep || '');
+            uf.value = cliente.uf || '';
+            cidadePrincipal.value = cliente.cidade_principal || '';
+            logradouro.value = cliente.logradouro || '';
+            numero.value = cliente.numero || '';
+            complemento.value = cliente.complemento || '';
+            bairro.value = cliente.bairro || '';
+
+            // Endereço entrega
+            enderecoEntregaIgual.checked = cliente.endereco_entrega_igual_principal !== false;
+            if (!enderecoEntregaIgual.checked) {
+                document.getElementById('camposEnderecoEntrega').style.display = 'block';
+                cepEntrega.value = formatarCEP(cliente.cep_entrega || '');
+                ufEntrega.value = cliente.uf_entrega || '';
+                cidadeEntrega.value = cliente.cidade_entrega || '';
+                logradouroEntrega.value = cliente.logradouro_entrega || '';
+                numeroEntrega.value = cliente.numero_entrega || '';
+                complementoEntrega.value = cliente.complemento_entrega || '';
+                bairroEntrega.value = cliente.bairro_entrega || '';
+            }
+
+            // Comercial
+            vendedorResponsavel.value = cliente.vendedor_responsavel || '';
+            observacoes.value = cliente.observacoes || '';
 
             // Configurar nome para exclusão
             document.getElementById('deleteClienteName').textContent = cliente.nome_razao_social;
@@ -692,16 +1070,19 @@
             return `${prefix}${timestamp}`;
         }
 
+        // Formatação de CEP
+        function formatarCEP(valor) {
+            valor = valor.replace(/\D/g, '');
+            return valor.replace(/(\d{5})(\d{3})/, '$1-$2');
+        }
+
         // Formatação de documento
         function formatarDocumento(valor, tipo) {
-            // Remover caracteres não numéricos
             valor = valor.replace(/\D/g, '');
             
             if (tipo === 'PF') {
-                // CPF: 000.000.000-00
                 return valor.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
             } else if (tipo === 'PJ') {
-                // CNPJ: 00.000.000/0000-00
                 return valor.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
             }
             
@@ -713,10 +1094,8 @@
             valor = valor.replace(/\D/g, '');
             
             if (valor.length <= 10) {
-                // Fixo: (00) 0000-0000
                 return valor.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
             } else {
-                // Celular: (00) 00000-0000
                 return valor.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
             }
         }
@@ -782,31 +1161,60 @@
             const tipo = this.value;
             const labelNome = document.getElementById('labelNome');
             const labelDocumento = document.getElementById('labelDocumento');
+            const labelDataNascFund = document.getElementById('labelDataNascFund');
             const helpDocumento = document.getElementById('helpDocumento');
             const campoFantasia = document.getElementById('campoFantasia');
+            const campoDataNascFund = document.getElementById('campoDataNascFund');
             const camposPJ = document.getElementById('camposPJ');
 
             if (tipo === 'PF') {
                 labelNome.textContent = 'Nome Completo';
                 labelDocumento.textContent = 'CPF';
+                labelDataNascFund.textContent = 'Data de Nascimento';
                 helpDocumento.textContent = 'Digite apenas números (11 dígitos)';
                 campoFantasia.classList.remove('show');
+                campoDataNascFund.classList.add('show');
                 camposPJ.classList.remove('show');
                 nomeRazaoSocial.placeholder = 'Digite o nome completo';
                 documento.placeholder = '000.000.000-00';
             } else if (tipo === 'PJ') {
                 labelNome.textContent = 'Razão Social';
                 labelDocumento.textContent = 'CNPJ';
+                labelDataNascFund.textContent = 'Data de Fundação';
                 helpDocumento.textContent = 'Digite apenas números (14 dígitos)';
                 campoFantasia.classList.add('show');
+                campoDataNascFund.classList.add('show');
                 camposPJ.classList.add('show');
                 nomeRazaoSocial.placeholder = 'Digite a razão social';
                 documento.placeholder = '00.000.000/0000-00';
+            } else {
+                campoFantasia.classList.remove('show');
+                campoDataNascFund.classList.remove('show');
+                camposPJ.classList.remove('show');
             }
 
             // Limpar campo documento apenas se não estiver em modo de edição
             if (!modoEdicao) {
                 documento.value = '';
+            }
+        });
+
+        // Controle do endereço de entrega
+        enderecoEntregaIgual.addEventListener('change', function() {
+            const camposEntrega = document.getElementById('camposEnderecoEntrega');
+            
+            if (this.checked) {
+                camposEntrega.style.display = 'none';
+                // Limpar campos de entrega
+                cepEntrega.value = '';
+                ufEntrega.value = '';
+                cidadeEntrega.value = '';
+                logradouroEntrega.value = '';
+                numeroEntrega.value = '';
+                complementoEntrega.value = '';
+                bairroEntrega.value = '';
+            } else {
+                camposEntrega.style.display = 'block';
             }
         });
 
@@ -822,8 +1230,20 @@
             this.value = formatarTelefone(this.value);
         });
 
-        // Cadastrar cliente
-        async function cadastrarCliente(dadosCliente) {
+        telefoneSecundario.addEventListener('input', function() {
+            this.value = formatarTelefone(this.value);
+        });
+
+        cep.addEventListener('input', function() {
+            this.value = formatarCEP(this.value);
+        });
+
+        cepEntrega.addEventListener('input', function() {
+            this.value = formatarCEP(this.value);
+        });
+
+        // Cadastrar/Atualizar cliente
+        async function salvarCliente(dadosCliente) {
             try {
                 // Verificar se documento já existe (apenas no cadastro)
                 if (!modoEdicao) {
@@ -841,14 +1261,34 @@
                     }
                 }
 
-                // Preparar dados para inserção
+                // Preparar dados para inserção/atualização
                 const dadosInsercao = {
                     tipo_cliente: dadosCliente.tipo_cliente,
+                    status: dadosCliente.status,
                     nome_razao_social: dadosCliente.nome_razao_social,
                     nome_fantasia: dadosCliente.nome_fantasia || null,
+                    data_nascimento_fundacao: dadosCliente.data_nascimento_fundacao || null,
                     email_principal: dadosCliente.email_principal || null,
+                    email_secundario: dadosCliente.email_secundario || null,
                     telefone_principal: dadosCliente.telefone_principal || null,
-                    cidade_principal: dadosCliente.cidade_principal || null
+                    telefone_secundario: dadosCliente.telefone_secundario || null,
+                    cep: dadosCliente.cep || null,
+                    uf: dadosCliente.uf || null,
+                    cidade_principal: dadosCliente.cidade_principal || null,
+                    logradouro: dadosCliente.logradouro || null,
+                    numero: dadosCliente.numero || null,
+                    complemento: dadosCliente.complemento || null,
+                    bairro: dadosCliente.bairro || null,
+                    endereco_entrega_igual_principal: dadosCliente.endereco_entrega_igual_principal,
+                    cep_entrega: dadosCliente.cep_entrega || null,
+                    uf_entrega: dadosCliente.uf_entrega || null,
+                    cidade_entrega: dadosCliente.cidade_entrega || null,
+                    logradouro_entrega: dadosCliente.logradouro_entrega || null,
+                    numero_entrega: dadosCliente.numero_entrega || null,
+                    complemento_entrega: dadosCliente.complemento_entrega || null,
+                    bairro_entrega: dadosCliente.bairro_entrega || null,
+                    vendedor_responsavel: dadosCliente.vendedor_responsavel || null,
+                    observacoes: dadosCliente.observacoes || null
                 };
 
                 // Se for cadastro, adicionar campos de controle
@@ -866,6 +1306,7 @@
                     dadosInsercao.cnpj = docLimpo;
                     dadosInsercao.inscricao_estadual = dadosCliente.inscricao_estadual || null;
                     dadosInsercao.inscricao_municipal = dadosCliente.inscricao_municipal || null;
+                    dadosInsercao.contato_responsavel = dadosCliente.contato_responsavel || null;
                 }
 
                 let result;
@@ -938,7 +1379,7 @@
         clienteForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            // Validações
+            // Validações básicas
             const tipo = tipoCliente.value;
             const nome = nomeRazaoSocial.value.trim();
             const doc = documento.value.trim();
@@ -988,21 +1429,46 @@
             // Preparar dados
             const dadosCliente = {
                 tipo_cliente: tipo,
+                status: status.value,
                 nome_razao_social: nome,
                 nome_fantasia: nomeFantasia.value.trim(),
                 documento: doc,
+                data_nascimento_fundacao: dataNascimentoFundacao.value || null,
                 email_principal: emailPrincipal.value.trim(),
+                email_secundario: emailSecundario.value.trim(),
                 telefone_principal: telefonePrincipal.value.replace(/\D/g, ''),
-                cidade_principal: cidadePrincipal.value.trim()
+                telefone_secundario: telefoneSecundario.value.replace(/\D/g, ''),
+                cep: cep.value.replace(/\D/g, ''),
+                uf: uf.value,
+                cidade_principal: cidadePrincipal.value.trim(),
+                logradouro: logradouro.value.trim(),
+                numero: numero.value.trim(),
+                complemento: complemento.value.trim(),
+                bairro: bairro.value.trim(),
+                endereco_entrega_igual_principal: enderecoEntregaIgual.checked,
+                vendedor_responsavel: vendedorResponsavel.value || null,
+                observacoes: observacoes.value.trim()
             };
 
-            // Se for PJ, adicionar campos extras
+            // Campos PJ
             if (tipo === 'PJ') {
                 dadosCliente.inscricao_estadual = inscricaoEstadual.value.trim();
                 dadosCliente.inscricao_municipal = inscricaoMunicipal.value.trim();
+                dadosCliente.contato_responsavel = contatoResponsavel.value.trim();
             }
 
-            await cadastrarCliente(dadosCliente);
+            // Endereço de entrega (se diferente)
+            if (!enderecoEntregaIgual.checked) {
+                dadosCliente.cep_entrega = cepEntrega.value.replace(/\D/g, '');
+                dadosCliente.uf_entrega = ufEntrega.value;
+                dadosCliente.cidade_entrega = cidadeEntrega.value.trim();
+                dadosCliente.logradouro_entrega = logradouroEntrega.value.trim();
+                dadosCliente.numero_entrega = numeroEntrega.value.trim();
+                dadosCliente.complemento_entrega = complementoEntrega.value.trim();
+                dadosCliente.bairro_entrega = bairroEntrega.value.trim();
+            }
+
+            await salvarCliente(dadosCliente);
 
             // Resetar botão
             submitBtn.disabled = false;
@@ -1023,6 +1489,7 @@
             
             if (usuario) {
                 console.log('✅ Usuário autenticado:', usuario.nome, '(' + usuario.cargo + ')');
+                carregarVendedores();
                 verificarParametros();
             }
         });
