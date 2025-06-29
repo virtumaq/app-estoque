@@ -45,37 +45,26 @@
             margin-bottom: 20px;
         }
 
-        .admin-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .back-btn {
+        .back-button {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 30px;
+            left: 0;
             background: #6366f1;
             color: white;
+            padding: 12px 20px;
             border: none;
-            padding: 8px 16px;
             border-radius: 8px;
-            cursor: pointer;
             font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            transition: background 0.2s;
         }
 
-        .back-btn:hover {
+        .back-button:hover {
             background: #5856eb;
         }
 
@@ -91,7 +80,6 @@
         .card-header {
             padding: 20px 24px;
             border-bottom: 1px solid #e5e7eb;
-            background: #f8fafc;
         }
 
         .card-title {
@@ -118,23 +106,16 @@
 
         .tab {
             padding: 12px 24px;
-            background: none;
-            border: none;
             cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: #6b7280;
             border-bottom: 2px solid transparent;
             transition: all 0.2s;
+            font-weight: 500;
+            color: #6b7280;
         }
 
         .tab.active {
             color: #6366f1;
             border-bottom-color: #6366f1;
-        }
-
-        .tab:hover {
-            color: #374151;
         }
 
         .tab-content {
@@ -145,8 +126,16 @@
             display: block;
         }
 
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
         }
 
         .form-label {
@@ -154,11 +143,9 @@
             font-weight: 500;
             color: #374151;
             margin-bottom: 6px;
-            display: block;
         }
 
         .form-input {
-            width: 100%;
             padding: 12px 16px;
             border: 1px solid #d1d5db;
             border-radius: 8px;
@@ -174,7 +161,6 @@
         }
 
         .form-select {
-            width: 100%;
             padding: 12px 16px;
             border: 1px solid #d1d5db;
             border-radius: 8px;
@@ -205,6 +191,16 @@
             background: #5856eb;
         }
 
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
         .btn-success {
             background: #10b981;
             color: white;
@@ -223,93 +219,113 @@
             background: #dc2626;
         }
 
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #374151;
-            border: 1px solid #d1d5db;
-        }
-
-        .btn-secondary:hover {
-            background: #e5e7eb;
-        }
-
         .btn-small {
             padding: 6px 12px;
             font-size: 0.8rem;
         }
 
-        .add-product-form {
+        .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .product-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .product-card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .product-card.editing {
+            border-color: #6366f1;
+            background: #fafafa;
+        }
+
+        .product-actions {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .product-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .product-id {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #6366f1;
+        }
+
+        .product-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 20px;
-            margin-bottom: 24px;
         }
 
-        .users-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .detail-item {
+            display: flex;
+            flex-direction: column;
         }
 
-        .users-table th,
-        .users-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .users-table th {
-            background: #f8fafc;
-            font-weight: 600;
-            color: #374151;
-            font-size: 0.9rem;
-        }
-
-        .users-table td {
-            font-size: 0.9rem;
-        }
-
-        .users-table tr:hover {
-            background: #f8fafc;
-        }
-
-        .user-badge {
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 0.75rem;
-            font-weight: 600;
+        .detail-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #6b7280;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            margin-bottom: 6px;
         }
 
-        .badge-admin {
-            background: #fee2e2;
-            color: #991b1b;
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1a1a1a;
         }
 
-        .badge-gerente {
+        .detail-value.price {
+            color: #ef4444;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .detail-input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .stock-badge {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .stock-high {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .stock-medium {
             background: #fef3c7;
             color: #92400e;
         }
 
-        .badge-usuario {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .status-ativo {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .status-inativo {
+        .stock-low {
             background: #fee2e2;
             color: #991b1b;
         }
@@ -366,22 +382,207 @@
             background: white;
             padding: 32px;
             border-radius: 12px;
-            max-width: 500px;
+            max-width: 400px;
             width: 90%;
+            text-align: center;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
         .modal h3 {
             font-size: 1.2rem;
             color: #1a1a1a;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
+        }
+
+        .modal p {
+            color: #6b7280;
+            margin-bottom: 24px;
         }
 
         .modal-actions {
             display: flex;
             gap: 12px;
-            justify-content: flex-end;
-            margin-top: 24px;
+            justify-content: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .search-section {
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        /* User Menu Styles */
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-button {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+
+        .user-button:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-color: #d1d5db;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: #6366f1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: #6b7280;
+            text-transform: capitalize;
+        }
+
+        .user-role.admin {
+            color: #ef4444;
+            font-weight: 500;
+        }
+
+        .user-role.gerente {
+            color: #f59e0b;
+            font-weight: 500;
+        }
+
+        .menu-arrow {
+            font-size: 0.7rem;
+            color: #6b7280;
+            transition: transform 0.2s;
+        }
+
+        .user-menu.open .menu-arrow {
+            transform: rotate(180deg);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s;
+        }
+
+        .user-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+        }
+
+        .dropdown-item.danger {
+            color: #ef4444;
+        }
+
+        .dropdown-item.danger:hover {
+            background: #fef2f2;
+        }
+
+        .dropdown-icon {
+            font-size: 1rem;
+            width: 16px;
+            text-align: center;
+        }
+
+        .admin-badge {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .gerente-badge {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         @media (max-width: 768px) {
@@ -389,28 +590,29 @@
                 padding: 16px;
             }
 
-            .header {
-                padding: 20px 0;
-            }
-
-            .back-btn {
+            .back-button {
                 position: relative;
-                top: auto;
-                left: auto;
                 margin-bottom: 20px;
             }
 
-            .add-product-form {
+            .user-info {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 16px auto 0;
+                width: fit-content;
+            }
+
+            .form-grid {
                 grid-template-columns: 1fr;
             }
 
-            .users-table {
-                font-size: 0.8rem;
+            .tabs {
+                flex-direction: column;
             }
 
-            .users-table th,
-            .users-table td {
-                padding: 8px;
+            .product-details {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -419,172 +621,115 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <a href="index.html" class="back-btn">
+            <a href="index.html" class="back-button">
                 ← Voltar ao Sistema
             </a>
             
-            <h1>🔧 Painel Administrativo</h1>
+            <h1>📋 Painel Administrativo</h1>
             <p>Área exclusiva para administradores</p>
-            <div class="admin-badge">
-                👑 Acesso Administrativo
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('products')">
+                📦 Gerenciar Produtos
+            </div>
+            <div class="tab" onclick="showTab('users')" id="usersTab" style="display: none;">
+                👥 Gerenciar Usuários
             </div>
         </div>
 
-        <!-- Tabs Navigation -->
-        <div class="card">
-            <div class="tabs">
-                <button class="tab active" onclick="showTab('products')">
-                    📦 Gerenciar Produtos
-                </button>
-                <button class="tab" onclick="showTab('users')">
-                    👥 Gerenciar Usuários
-                </button>
-            </div>
-
-            <!-- Tab: Produtos -->
-            <div id="products-tab" class="tab-content active">
+        <!-- Produtos Tab -->
+        <div id="productsTab" class="tab-content active">
+            <!-- Adicionar Produto -->
+            <div class="card">
                 <div class="card-header">
                     <div class="card-title">Adicionar Novo Produto</div>
                     <div class="card-subtitle">Cadastre produtos no sistema de estoque</div>
                 </div>
                 <div class="card-content">
                     <form id="productForm">
-                        <div class="add-product-form">
+                        <div class="form-grid">
                             <div class="form-group">
                                 <label class="form-label">ID do Produto</label>
-                                <input type="text" id="id" class="form-input" required placeholder="Ex: VTF100">
+                                <input type="text" id="id" class="form-input" required placeholder="Ex. VTF100">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Tipo</label>
-                                <input type="text" id="tipo" class="form-input" required placeholder="Ex: Fiber Mini">
+                                <input type="text" id="tipo" class="form-input" required placeholder="Ex. Fiber Mini">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Potência</label>
-                                <input type="text" id="potencia" class="form-input" required placeholder="Ex: 100w">
+                                <input type="text" id="potencia" class="form-input" required placeholder="Ex. 100w">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Área Útil</label>
-                                <input type="text" id="area_util" class="form-input" required placeholder="Ex: 300x300mm">
+                                <input type="text" id="area_util" class="form-input" required placeholder="Ex. 300x300mm">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Categoria</label>
-                                <input type="text" id="categoria" class="form-input" required placeholder="Ex: Fiber Laser">
+                                <input type="text" id="categoria" class="form-input" required placeholder="Ex. Fiber Laser">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Estoque Inicial</label>
-                                <input type="number" id="estoque" class="form-input" required placeholder="Ex: 10">
+                                <input type="number" id="estoque" class="form-input" required placeholder="Ex. 10">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Valor (R$)</label>
-                                <input type="number" id="valor" class="form-input" step="0.01" required placeholder="Ex: 60900.00">
+                                <input type="number" id="valor" class="form-input" step="0.01" required placeholder="Ex. 60900.00">
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">
-                            ✅ Adicionar Produto
+                            ✓ Adicionar Produto
                         </button>
                     </form>
                 </div>
             </div>
 
-            <!-- Tab: Usuários -->
-            <div id="users-tab" class="tab-content">
+            <!-- Lista de Produtos -->
+            <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Gerenciar Usuários</div>
-                    <div class="card-subtitle">Adicione e gerencie usuários do sistema</div>
+                    <div class="card-title">Produtos Cadastrados</div>
+                    <div class="card-subtitle">Gerencie os produtos existentes no sistema</div>
                 </div>
                 <div class="card-content">
-                    <!-- Formulário Adicionar Usuário -->
-                    <form id="userForm">
-                        <div class="add-product-form">
-                            <div class="form-group">
-                                <label class="form-label">Nome Completo</label>
-                                <input type="text" id="user-nome" class="form-input" required placeholder="Ex: João Silva">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Email</label>
-                                <input type="email" id="user-email" class="form-input" required placeholder="joao@empresa.com">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Senha</label>
-                                <input type="password" id="user-senha" class="form-input" required placeholder="Digite uma senha">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Cargo</label>
-                                <select id="user-cargo" class="form-select" required>
-                                    <option value="">Selecione um cargo</option>
-                                    <option value="admin">Administrador</option>
-                                    <option value="gerente">Gerente</option>
-                                    <option value="usuario">Usuário</option>
-                                </select>
-                            </div>
+                    <div class="search-section">
+                        <input type="text" id="searchProducts" class="search-input" placeholder="Buscar produtos...">
+                    </div>
+                    <div id="productsContainer" class="products-grid">
+                        <div class="empty-state">
+                            <h3>Carregando produtos...</h3>
+                            <p>Aguarde enquanto buscamos os dados</p>
                         </div>
-                        <button type="submit" class="btn btn-success">
-                            👤 Adicionar Usuário
-                        </button>
-                    </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <!-- Lista de Usuários -->
-                    <table class="users-table">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Cargo</th>
-                                <th>Status</th>
-                                <th>Criado em</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usersTableBody">
-                            <tr>
-                                <td colspan="6" style="text-align: center; color: #6b7280;">
-                                    Carregando usuários...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <!-- Usuários Tab -->
+        <div id="usersTab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Gerenciar Usuários</div>
+                    <div class="card-subtitle">Controle de acesso ao sistema</div>
+                </div>
+                <div class="card-content">
+                    <p>Funcionalidade de gerenciamento de usuários será implementada em breve.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Editar Usuário -->
-    <div id="editUserModal" class="modal">
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="modal">
         <div class="modal-content">
-            <h3>Editar Usuário</h3>
-            <form id="editUserForm">
-                <div class="form-group">
-                    <label class="form-label">Nome</label>
-                    <input type="text" id="edit-user-nome" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" id="edit-user-email" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Cargo</label>
-                    <select id="edit-user-cargo" class="form-select" required>
-                        <option value="admin">Administrador</option>
-                        <option value="gerente">Gerente</option>
-                        <option value="usuario">Usuário</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Status</label>
-                    <select id="edit-user-ativo" class="form-select" required>
-                        <option value="true">Ativo</option>
-                        <option value="false">Inativo</option>
-                    </select>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        Salvar Alterações
-                    </button>
-                </div>
-            </form>
+            <h3>Confirmar Exclusão</h3>
+            <p>Tem certeza que deseja deletar este produto?</p>
+            <p><strong id="deleteProductName"></strong></p>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="confirmDelete()">Deletar</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+            </div>
         </div>
     </div>
 
@@ -592,49 +737,162 @@
     <div id="notification" class="notification"></div>
 
     <script>
-        // CONFIGURAÇÃO DO SUPABASE
+        // CONFIGURAÇÃO
         const SUPABASE_URL = 'https://bfmsnvaadrlhlofmlprt.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmbXNudmFhZHJsaGxvZm1scHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExMjkxODgsImV4cCI6MjA2NjcwNTE4OH0.LPipIRVv2yZH3pTb6Zdz2Jqj7pQ1X5mjZ4ikF_R_Fik';
         
+        // Inicializar Supabase
         const { createClient } = supabase;
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let users = [];
-        let editingUserId = null;
+        let products = [];
+        let filteredProducts = [];
+        let realtimeChannel = null;
+        let editingProductId = null;
+        let deleteProductId = null;
+        let usuarioAtual = null;
 
         // Elementos DOM
-        const notification = document.getElementById('notification');
         const productForm = document.getElementById('productForm');
-        const userForm = document.getElementById('userForm');
-        const editUserForm = document.getElementById('editUserForm');
-        const editUserModal = document.getElementById('editUserModal');
-        const usersTableBody = document.getElementById('usersTableBody');
+        const productsContainer = document.getElementById('productsContainer');
+        const searchProducts = document.getElementById('searchProducts');
+        const notification = document.getElementById('notification');
+        const confirmModal = document.getElementById('confirmModal');
 
-        // Verificar se usuário é admin
-        function verificarAdmin() {
-            const usuarioLogado = localStorage.getItem('usuarioLogado');
+        // ===== FUNÇÕES DE AUTENTICAÇÃO =====
+        
+        function verificarLogin() {
+            const dadosUsuario = localStorage.getItem('usuarioLogado');
             
-            if (!usuarioLogado) {
+            if (!dadosUsuario) {
                 window.location.href = 'login.html';
-                return false;
+                return null;
             }
             
             try {
-                const dados = JSON.parse(usuarioLogado);
-                if (dados.cargo !== 'admin') {
+                usuarioAtual = JSON.parse(dadosUsuario);
+                
+                // Verificar se tem permissão para acessar admin
+                if (usuarioAtual.cargo === 'usuario') {
                     alert('Acesso negado! Apenas administradores podem acessar esta área.');
                     window.location.href = 'index.html';
-                    return false;
+                    return null;
                 }
-                return true;
+                
+                return usuarioAtual;
             } catch (error) {
+                console.error('Erro ao ler dados do usuário:', error);
                 localStorage.removeItem('usuarioLogado');
                 window.location.href = 'login.html';
-                return false;
+                return null;
             }
         }
 
-        // Função para mostrar notificações
+        function logout() {
+            localStorage.removeItem('usuarioLogado');
+            window.location.href = 'login.html';
+        }
+
+        function temPermissao(acao) {
+            if (!usuarioAtual) return false;
+            
+            const permissoes = {
+                'admin': ['criar', 'editar', 'deletar', 'visualizar', 'gerenciar'],
+                'gerente': ['criar', 'editar', 'visualizar'],
+                'usuario': ['visualizar']
+            };
+            
+            return permissoes[usuarioAtual.cargo]?.includes(acao) || false;
+        }
+
+        function adicionarInfoUsuario() {
+            if (!usuarioAtual) return;
+            
+            const header = document.querySelector('.header');
+            if (!header) return;
+            
+            const infoExistente = header.querySelector('.user-info');
+            if (infoExistente) {
+                infoExistente.remove();
+            }
+            
+            const userInfo = document.createElement('div');
+            userInfo.className = 'user-info';
+            
+            userInfo.innerHTML = `
+                <div class="user-menu" id="userMenu">
+                    <div class="user-button" onclick="toggleUserMenu()">
+                        <div class="user-avatar">
+                            ${usuarioAtual.nome.charAt(0).toUpperCase()}
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name">${usuarioAtual.nome}</div>
+                            <div class="user-role ${usuarioAtual.cargo}">
+                                ${usuarioAtual.cargo}
+                                ${usuarioAtual.cargo === 'admin' ? '<span class="admin-badge">Admin</span>' : ''}
+                                ${usuarioAtual.cargo === 'gerente' ? '<span class="gerente-badge">Gerente</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="menu-arrow">▼</div>
+                    </div>
+                    
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="index.html" class="dropdown-item">
+                            <span class="dropdown-icon">🏠</span>
+                            Voltar ao Sistema
+                        </a>
+                        <div class="dropdown-item danger" onclick="logout()">
+                            <span class="dropdown-icon">🚪</span>
+                            Sair
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            header.style.position = 'relative';
+            header.appendChild(userInfo);
+        }
+
+        function toggleUserMenu() {
+            const userMenu = document.getElementById('userMenu');
+            const dropdown = document.getElementById('userDropdown');
+            
+            userMenu.classList.toggle('open');
+            dropdown.classList.toggle('show');
+        }
+
+        // Fechar menu ao clicar fora
+        document.addEventListener('click', (e) => {
+            const userMenu = document.getElementById('userMenu');
+            if (userMenu && !userMenu.contains(e.target)) {
+                userMenu.classList.remove('open');
+                document.getElementById('userDropdown').classList.remove('show');
+            }
+        });
+
+        function configurarPermissoes() {
+            if (!usuarioAtual) return;
+            
+            // Mostrar tab de usuários apenas para admin
+            if (usuarioAtual.cargo === 'admin') {
+                document.getElementById('usersTab').style.display = 'block';
+            }
+        }
+
+        // Funções utilitárias
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        function getStockClass(stock) {
+            if (stock >= 15) return 'stock-high';
+            if (stock >= 5) return 'stock-medium';
+            return 'stock-low';
+        }
+
         function showNotification(text, type = 'success') {
             notification.innerHTML = text;
             notification.className = `notification ${type} show`;
@@ -643,28 +901,197 @@
             }, 4000);
         }
 
-        // Funções de navegação entre tabs
+        // Funções de tabs
         function showTab(tabName) {
             // Remover classe active de todas as tabs
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-
-            // Ativar tab selecionada
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Adicionar classe active à tab selecionada
             event.target.classList.add('active');
-            document.getElementById(tabName + '-tab').classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
 
-            // Carregar dados se necessário
-            if (tabName === 'users') {
-                loadUsers();
+        // Busca de produtos
+        function applyProductFilter() {
+            const searchTerm = searchProducts.value.toLowerCase();
+            
+            filteredProducts = products.filter(product => {
+                return product.id.toLowerCase().includes(searchTerm) ||
+                       product.tipo.toLowerCase().includes(searchTerm) ||
+                       product.categoria.toLowerCase().includes(searchTerm);
+            });
+            
+            renderProducts();
+        }
+
+        searchProducts.addEventListener('input', applyProductFilter);
+
+        // Renderizar produtos
+        function renderProducts() {
+            if (filteredProducts.length === 0) {
+                productsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>${products.length === 0 ? 'Nenhum produto cadastrado' : 'Nenhum produto encontrado'}</h3>
+                        <p>${products.length === 0 ? 'Adicione seu primeiro produto usando o formulário acima' : 'Tente ajustar a busca'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = filteredProducts.map(product => `
+                <div class="product-card ${editingProductId === product.id ? 'editing' : ''}" data-id="${product.id}">
+                    <div class="product-actions">
+                        ${editingProductId === product.id ? `
+                            <button class="btn btn-success btn-small" onclick="saveProduct('${product.id}')" title="Salvar">✓</button>
+                            <button class="btn btn-secondary btn-small" onclick="cancelEdit()" title="Cancelar">✕</button>
+                        ` : `
+                            <button class="btn btn-secondary btn-small" onclick="editProduct('${product.id}')" title="Editar">✎</button>
+                            ${temPermissao('deletar') ? `<button class="btn btn-danger btn-small" onclick="deleteProduct('${product.id}')" title="Excluir">✕</button>` : ''}
+                        `}
+                    </div>
+                    
+                    <div class="product-header">
+                        <div class="product-id">${product.id}</div>
+                    </div>
+                    
+                    <div class="product-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Tipo</div>
+                            <div class="detail-value">
+                                ${editingProductId === product.id ? 
+                                    `<input type="text" class="detail-input" id="edit-tipo" value="${product.tipo}">` :
+                                    product.tipo
+                                }
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Potência</div>
+                            <div class="detail-value">
+                                ${editingProductId === product.id ? 
+                                    `<input type="text" class="detail-input" id="edit-potencia" value="${product.potencia}">` :
+                                    product.potencia
+                                }
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Área Útil</div>
+                            <div class="detail-value">
+                                ${editingProductId === product.id ? 
+                                    `<input type="text" class="detail-input" id="edit-area_util" value="${product.area_util}">` :
+                                    product.area_util
+                                }
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Categoria</div>
+                            <div class="detail-value">
+                                ${editingProductId === product.id ? 
+                                    `<input type="text" class="detail-input" id="edit-categoria" value="${product.categoria}">` :
+                                    product.categoria
+                                }
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Estoque</div>
+                            <div class="detail-value">
+                                ${editingProductId === product.id ? 
+                                    `<input type="number" class="detail-input" id="edit-estoque" value="${product.estoque}">` :
+                                    `<span class="stock-badge ${getStockClass(product.estoque)}">${product.estoque}</span>`
+                                }
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Valor</div>
+                            <div class="detail-value price">
+                                ${editingProductId === product.id ? 
+                                    `<input type="number" step="0.01" class="detail-input" id="edit-valor" value="${product.valor}">` :
+                                    formatCurrency(product.valor)
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            productsContainer.innerHTML = html;
+        }
+
+        // Funções de edição
+        function editProduct(id) {
+            editingProductId = id;
+            renderProducts();
+        }
+
+        function cancelEdit() {
+            editingProductId = null;
+            renderProducts();
+        }
+
+        async function saveProduct(id) {
+            try {
+                const updatedData = {
+                    tipo: document.getElementById('edit-tipo').value,
+                    potencia: document.getElementById('edit-potencia').value,
+                    area_util: document.getElementById('edit-area_util').value,
+                    categoria: document.getElementById('edit-categoria').value,
+                    estoque: parseInt(document.getElementById('edit-estoque').value),
+                    valor: parseFloat(document.getElementById('edit-valor').value)
+                };
+
+                const { error } = await supabaseClient
+                    .from('produtos')
+                    .update(updatedData)
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                showNotification('Produto atualizado com sucesso!', 'success');
+                editingProductId = null;
+
+            } catch (error) {
+                console.error('Erro ao atualizar:', error);
+                showNotification(`Erro: ${error.message}`, 'error');
             }
         }
 
-        // ===== FUNÇÕES DE PRODUTOS =====
+        // Funções de exclusão
+        function deleteProduct(id) {
+            if (!temPermissao('deletar')) {
+                showNotification('Você não tem permissão para deletar produtos', 'error');
+                return;
+            }
 
+            const product = products.find(p => p.id === id);
+            document.getElementById('deleteProductName').textContent = `${product.id} - ${product.tipo}`;
+            deleteProductId = id;
+            confirmModal.classList.add('show');
+        }
+
+        function closeModal() {
+            confirmModal.classList.remove('show');
+            deleteProductId = null;
+        }
+
+        async function confirmDelete() {
+            try {
+                const { error } = await supabaseClient
+                    .from('produtos')
+                    .delete()
+                    .eq('id', deleteProductId);
+
+                if (error) throw error;
+
+                showNotification('Produto deletado com sucesso!', 'success');
+                closeModal();
+
+            } catch (error) {
+                console.error('Erro ao deletar:', error);
+                showNotification(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Adicionar produto
         async function addProduct(data) {
             try {
                 const { error } = await supabaseClient
@@ -673,152 +1100,68 @@
 
                 if (error) throw error;
 
-                showNotification('✅ Produto adicionado com sucesso!', 'success');
+                showNotification('Produto adicionado com sucesso!', 'success');
                 productForm.reset();
 
             } catch (error) {
-                console.error('Erro ao adicionar produto:', error);
-                showNotification(`❌ Erro: ${error.message}`, 'error');
+                console.error('Erro ao adicionar:', error);
+                showNotification(`Erro ao adicionar produto: ${error.message}`, 'error');
             }
         }
 
-        // ===== FUNÇÕES DE USUÁRIOS =====
-
-        async function loadUsers() {
+        // Carregar produtos
+        async function loadProducts() {
             try {
                 const { data, error } = await supabaseClient
-                    .from('usuarios')
+                    .from('produtos')
                     .select('*')
-                    .order('criado_em', { ascending: false });
+                    .order('id');
 
                 if (error) throw error;
 
-                users = data || [];
-                renderUsers();
+                products = data || [];
+                filteredProducts = [...products];
+                renderProducts();
 
             } catch (error) {
-                console.error('Erro ao carregar usuários:', error);
-                showNotification(`❌ Erro ao carregar usuários: ${error.message}`, 'error');
+                console.error('Erro ao carregar:', error);
+                showNotification(`Erro ao carregar dados: ${error.message}`, 'error');
             }
         }
 
-        function renderUsers() {
-            if (users.length === 0) {
-                usersTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" style="text-align: center; color: #6b7280;">
-                            Nenhum usuário encontrado
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            const html = users.map(user => `
-                <tr>
-                    <td>${user.nome}</td>
-                    <td>${user.email}</td>
-                    <td>
-                        <span class="user-badge badge-${user.cargo}">
-                            ${user.cargo}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="status-badge ${user.ativo ? 'status-ativo' : 'status-inativo'}">
-                            ${user.ativo ? 'Ativo' : 'Inativo'}
-                        </span>
-                    </td>
-                    <td>${new Date(user.criado_em).toLocaleDateString('pt-BR')}</td>
-                    <td>
-                        <button class="btn btn-secondary btn-small" onclick="editUser(${user.id})">
-                            ✏️ Editar
-                        </button>
-                        ${user.cargo !== 'admin' ? `
-                            <button class="btn btn-danger btn-small" onclick="toggleUserStatus(${user.id}, ${!user.ativo})">
-                                ${user.ativo ? '🚫 Desativar' : '✅ Ativar'}
-                            </button>
-                        ` : ''}
-                    </td>
-                </tr>
-            `).join('');
-
-            usersTableBody.innerHTML = html;
+        // Configurar tempo real
+        function setupRealtime() {
+            realtimeChannel = supabaseClient
+                .channel('public:produtos')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'produtos'
+                }, (payload) => {
+                    console.log('⚡ Mudança detectada:', payload);
+                    
+                    if (payload.eventType === 'INSERT') {
+                        products.push(payload.new);
+                        showNotification('Novo produto adicionado!', 'success');
+                        
+                    } else if (payload.eventType === 'UPDATE') {
+                        const index = products.findIndex(p => p.id === payload.new.id);
+                        if (index !== -1) {
+                            products[index] = payload.new;
+                            showNotification('Produto atualizado!', 'success');
+                        }
+                        
+                    } else if (payload.eventType === 'DELETE') {
+                        products = products.filter(p => p.id !== payload.old.id);
+                        showNotification('Produto removido!', 'success');
+                    }
+                    
+                    applyProductFilter();
+                })
+                .subscribe();
         }
 
-        async function addUser(data) {
-            try {
-                const { error } = await supabaseClient
-                    .from('usuarios')
-                    .insert([data]);
-
-                if (error) throw error;
-
-                showNotification('✅ Usuário adicionado com sucesso!', 'success');
-                userForm.reset();
-                loadUsers();
-
-            } catch (error) {
-                console.error('Erro ao adicionar usuário:', error);
-                showNotification(`❌ Erro: ${error.message}`, 'error');
-            }
-        }
-
-        function editUser(userId) {
-            const user = users.find(u => u.id === userId);
-            if (!user) return;
-
-            editingUserId = userId;
-            document.getElementById('edit-user-nome').value = user.nome;
-            document.getElementById('edit-user-email').value = user.email;
-            document.getElementById('edit-user-cargo').value = user.cargo;
-            document.getElementById('edit-user-ativo').value = user.ativo.toString();
-
-            editUserModal.classList.add('show');
-        }
-
-        function closeEditModal() {
-            editUserModal.classList.remove('show');
-            editingUserId = null;
-        }
-
-        async function updateUser(userId, data) {
-            try {
-                const { error } = await supabaseClient
-                    .from('usuarios')
-                    .update(data)
-                    .eq('id', userId);
-
-                if (error) throw error;
-
-                showNotification('✅ Usuário atualizado com sucesso!', 'success');
-                closeEditModal();
-                loadUsers();
-
-            } catch (error) {
-                console.error('Erro ao atualizar usuário:', error);
-                showNotification(`❌ Erro: ${error.message}`, 'error');
-            }
-        }
-
-        async function toggleUserStatus(userId, newStatus) {
-            try {
-                const { error } = await supabaseClient
-                    .from('usuarios')
-                    .update({ ativo: newStatus })
-                    .eq('id', userId);
-
-                if (error) throw error;
-
-                showNotification(`✅ Usuário ${newStatus ? 'ativado' : 'desativado'} com sucesso!`, 'success');
-                loadUsers();
-
-            } catch (error) {
-                console.error('Erro ao alterar status:', error);
-                showNotification(`❌ Erro: ${error.message}`, 'error');
-            }
-        }
-
-        // Event Listeners
+        // Event listeners
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -835,47 +1178,26 @@
             await addProduct(data);
         });
 
-        userForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const data = {
-                nome: document.getElementById('user-nome').value.trim(),
-                email: document.getElementById('user-email').value.trim(),
-                senha: document.getElementById('user-senha').value.trim(),
-                cargo: document.getElementById('user-cargo').value,
-                ativo: true
-            };
-
-            await addUser(data);
-        });
-
-        editUserForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const data = {
-                nome: document.getElementById('edit-user-nome').value.trim(),
-                email: document.getElementById('edit-user-email').value.trim(),
-                cargo: document.getElementById('edit-user-cargo').value,
-                ativo: document.getElementById('edit-user-ativo').value === 'true'
-            };
-
-            await updateUser(editingUserId, data);
-        });
-
         // Fechar modal ao clicar fora
-        editUserModal.addEventListener('click', (e) => {
-            if (e.target === editUserModal) {
-                closeEditModal();
-            }
+        confirmModal.addEventListener('click', (e) => {
+            if (e.target === confirmModal) closeModal();
         });
 
-        // Inicializar
-        window.addEventListener('DOMContentLoaded', () => {
-            if (verificarAdmin()) {
-                console.log('✅ Acesso administrativo autorizado');
-                loadUsers();
+        // Inicializar sistema
+        async function init() {
+            console.log('🔐 Verificando autenticação...');
+            const usuario = verificarLogin();
+            
+            if (usuario) {
+                console.log('✅ Usuário autenticado:', usuario.nome, '(' + usuario.cargo + ')');
+                adicionarInfoUsuario();
+                configurarPermissoes();
+                await loadProducts();
+                setupRealtime();
             }
-        });
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
