@@ -445,6 +445,13 @@
             </div>
         </div>
 
+        <!-- Botão Novo Cliente -->
+        <div style="margin-bottom: 24px; text-align: center;">
+            <a href="cadastro-cliente.html" class="btn btn-success" style="text-decoration: none !important;">
+                ➕ Novo Cliente
+            </a>
+        </div>
+
         <!-- Controles -->
         <div class="card">
             <div class="card-header">
@@ -477,14 +484,9 @@
                         </select>
                     </div>
                     
-                    <div style="display: flex; gap: 8px; flex-direction: column;">
-                        <a href="cadastro-cliente.html" class="btn btn-success" style="text-decoration: none !important;">
-                            ➕ Novo Cliente
-                        </a>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-secondary btn-small" onclick="exportToExcel()">Excel</button>
-                            <button class="btn btn-secondary btn-small" onclick="exportToPDF()">PDF</button>
-                        </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary btn-small" onclick="exportToExcel()">Excel</button>
+                        <button class="btn btn-secondary btn-small" onclick="exportToPDF()">PDF</button>
                     </div>
                 </div>
             </div>
@@ -520,6 +522,7 @@
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let clientes = [];
+        let filteredClientes = [];
         let usuarioAtual = null;
 
         // Elementos DOM
@@ -610,9 +613,38 @@
 
         // Filtros e busca
         function applyFilters() {
-            // Por enquanto só renderiza todos os clientes
-            // Implementaremos filtros mais tarde se necessário
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const tipoValue = tipoFilter.value;
+            const statusValue = statusFilter.value; // Para uso futuro
+
+            filteredClientes = clientes.filter(cliente => {
+                // Filtro de busca
+                let matchesSearch = true;
+                if (searchTerm) {
+                    const documento = cliente.tipo_cliente === 'PF' ? 
+                        formatDocument(cliente.cpf, 'PF') : 
+                        formatDocument(cliente.cnpj, 'PJ');
+                    
+                    matchesSearch = 
+                        cliente.nome_razao_social.toLowerCase().includes(searchTerm) ||
+                        cliente.codigo_cliente.toLowerCase().includes(searchTerm) ||
+                        (cliente.nome_fantasia && cliente.nome_fantasia.toLowerCase().includes(searchTerm)) ||
+                        (documento && documento.toLowerCase().includes(searchTerm)) ||
+                        (cliente.email_principal && cliente.email_principal.toLowerCase().includes(searchTerm)) ||
+                        (cliente.cidade_principal && cliente.cidade_principal.toLowerCase().includes(searchTerm));
+                }
+
+                // Filtro de tipo
+                const matchesTipo = !tipoValue || cliente.tipo_cliente === tipoValue;
+
+                // Filtro de status (preparado para futuro uso)
+                const matchesStatus = true; // Por enquanto todos são ativos
+
+                return matchesSearch && matchesTipo && matchesStatus;
+            });
+
             renderClientes();
+            updateStats();
         }
 
         // Event listeners para filtros
@@ -636,20 +668,25 @@
 
         // Renderizar clientes
         function renderClientes() {
-            if (clientes.length === 0) {
+            const clientesToRender = filteredClientes || clientes;
+            
+            if (clientesToRender.length === 0) {
                 const usuario = JSON.parse(localStorage.getItem('usuarioLogado'));
                 const isUsuarioComum = usuario && usuario.cargo === 'usuario';
                 
+                // Verificar se é resultado de filtro ou lista vazia
+                const isFiltered = searchInput.value.trim() || tipoFilter.value || statusFilter.value;
+                
                 clientesContainer.innerHTML = `
                     <div class="empty-state">
-                        <h3>${isUsuarioComum ? 'Você ainda não cadastrou clientes' : 'Nenhum cliente encontrado'}</h3>
-                        <p>${isUsuarioComum ? 'Comece cadastrando seu primeiro cliente!' : 'Os clientes cadastrados aparecerão aqui'}</p>
+                        <h3>${isFiltered ? 'Nenhum cliente encontrado' : (isUsuarioComum ? 'Você ainda não cadastrou clientes' : 'Nenhum cliente encontrado')}</h3>
+                        <p>${isFiltered ? 'Tente ajustar os filtros de busca' : (isUsuarioComum ? 'Comece cadastrando seu primeiro cliente!' : 'Os clientes cadastrados aparecerão aqui')}</p>
                     </div>
                 `;
                 return;
             }
 
-            const html = clientes.map(cliente => {
+            const html = clientesToRender.map(cliente => {
                 const documento = cliente.tipo_cliente === 'PF' ? 
                     formatDocument(cliente.cpf, 'PF') : 
                     formatDocument(cliente.cnpj, 'PJ');
@@ -740,6 +777,7 @@
                 }
 
                 clientes = data || [];
+                filteredClientes = [...clientes]; // Inicializar filtros
                 totalClientes.textContent = clientes.length;
                 updateStats();
                 renderClientes();
