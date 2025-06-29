@@ -807,7 +807,7 @@
             if (!usuarioAtual) return false;
             
             const permissoes = {
-                'admin': ['criar', 'editar', 'deletar', 'visualizar', 'gerenciar'],
+                'admin': ['editar', 'deletar', 'visualizar', 'gerenciar'],
                 'gerente': ['editar', 'visualizar'],
                 'usuario': ['visualizar']
             };
@@ -1174,7 +1174,7 @@
                             <div class="detail-value price">
                                 ${editingProductId === product.id ? 
                                     `<input type="number" step="0.01" class="detail-input" id="edit-valor" value="${product.valor}">` :
-                                    (usuarioAtual.cargo !== 'usuario' ? formatCurrency(product.valor) : 'Restrito')
+                                    formatCurrency(product.valor)
                                 }
                             </div>
                         </div>
@@ -1282,7 +1282,7 @@
                 'Área Útil': p.area_util,
                 Categoria: p.categoria,
                 Estoque: p.estoque,
-                Valor: usuarioAtual.cargo !== 'usuario' ? p.valor : 'Restrito'
+                Valor: p.valor
             }));
 
             const ws = XLSX.utils.json_to_sheet(data);
@@ -1311,12 +1311,8 @@
                 
                 doc.text(`ID: ${product.id} | ${product.tipo}`, 20, y);
                 doc.text(`Categoria: ${product.categoria} | Estoque: ${product.estoque}`, 20, y + 10);
-                if (usuarioAtual.cargo !== 'usuario') {
-                    doc.text(`Valor: ${formatCurrency(product.valor)}`, 20, y + 20);
-                    y += 35;
-                } else {
-                    y += 25;
-                }
+                doc.text(`Valor: ${formatCurrency(product.valor)}`, 20, y + 20);
+                y += 35;
             });
             
             doc.save(`estoque_${new Date().toISOString().split('T')[0]}.pdf`);
