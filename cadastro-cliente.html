@@ -165,6 +165,12 @@
             border-color: #ef4444;
         }
 
+        .form-input:disabled {
+            background: #f9fafb;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
         .form-select {
             padding: 12px 16px;
             border: 1px solid #d1d5db;
@@ -178,6 +184,12 @@
             outline: none;
             border-color: #6366f1;
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.05);
+        }
+
+        .form-select:disabled {
+            background: #f9fafb;
+            color: #6b7280;
+            cursor: not-allowed;
         }
 
         .btn {
@@ -224,6 +236,15 @@
 
         .btn-success:hover {
             background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
         }
 
         .form-actions {
@@ -293,6 +314,63 @@
             to { transform: rotate(360deg); }
         }
 
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            color: #1e40af;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .modal h3 {
+            font-size: 1.2rem;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+
+        .modal p {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 16px;
@@ -327,19 +405,24 @@
                 ← Voltar aos Clientes
             </a>
             
-            <h1>👤 Cadastro de Cliente</h1>
-            <p>Cadastre um novo cliente no sistema</p>
+            <h1 id="pageTitle">👤 Cadastro de Cliente</h1>
+            <p id="pageSubtitle">Cadastre um novo cliente no sistema</p>
             <div class="status">
                 <div class="status-dot"></div>
                 <span>Sistema ativo</span>
             </div>
         </div>
 
+        <!-- Alerta para edição -->
+        <div id="editAlert" class="alert alert-info" style="display: none;">
+            <strong>Modo de Edição:</strong> Você está editando os dados de um cliente existente.
+        </div>
+
         <!-- Formulário -->
         <div class="card">
             <div class="card-header">
-                <div class="card-title">Dados do Cliente</div>
-                <div class="card-subtitle">Preencha as informações do cliente</div>
+                <div class="card-title" id="cardTitle">Dados do Cliente</div>
+                <div class="card-subtitle" id="cardSubtitle">Preencha as informações do cliente</div>
             </div>
             <div class="card-content">
                 <form id="clienteForm">
@@ -411,8 +494,24 @@
                         <button type="submit" class="btn btn-success" id="submitBtn">
                             <span id="submitText">💾 Cadastrar Cliente</span>
                         </button>
+                        <button type="button" class="btn btn-danger" id="deleteBtn" style="display: none;" onclick="confirmarExclusao()">
+                            🗑️ Excluir
+                        </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirmar Exclusão</h3>
+            <p>Tem certeza que deseja excluir este cliente?</p>
+            <p><strong id="deleteClienteName"></strong></p>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="excluirCliente()">Excluir</button>
+                <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
             </div>
         </div>
     </div>
@@ -441,9 +540,42 @@
         const inscricaoMunicipal = document.getElementById('inscricaoMunicipal');
         const submitBtn = document.getElementById('submitBtn');
         const submitText = document.getElementById('submitText');
+        const deleteBtn = document.getElementById('deleteBtn');
         const notification = document.getElementById('notification');
+        const deleteModal = document.getElementById('deleteModal');
 
         let usuarioAtual = null;
+        let modoEdicao = false;
+        let clienteId = null;
+        let clienteOriginal = null;
+
+        // Verificar parâmetros da URL
+        function verificarParametros() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('edit');
+            
+            if (editId) {
+                modoEdicao = true;
+                clienteId = editId;
+                configurarModoEdicao();
+                carregarDadosCliente(editId);
+            }
+        }
+
+        // Configurar interface para modo de edição
+        function configurarModoEdicao() {
+            document.getElementById('pageTitle').textContent = '✏️ Editar Cliente';
+            document.getElementById('pageSubtitle').textContent = 'Edite as informações do cliente';
+            document.getElementById('cardTitle').textContent = 'Editar Dados do Cliente';
+            document.getElementById('cardSubtitle').textContent = 'Modifique as informações necessárias';
+            document.getElementById('submitText').textContent = '💾 Salvar Alterações';
+            document.getElementById('editAlert').style.display = 'block';
+            
+            // Mostrar botão de exclusão apenas para admin/gerente
+            if (usuarioAtual && (usuarioAtual.cargo === 'admin' || usuarioAtual.cargo === 'gerente')) {
+                deleteBtn.style.display = 'inline-flex';
+            }
+        }
 
         // Verificar login
         function verificarLogin() {
@@ -465,6 +597,19 @@
             }
         }
 
+        // Verificar permissão de edição
+        function verificarPermissaoEdicao(cliente) {
+            if (!usuarioAtual || !cliente) return false;
+            
+            // Admin e gerente podem editar qualquer cliente
+            if (usuarioAtual.cargo === 'admin' || usuarioAtual.cargo === 'gerente') {
+                return true;
+            }
+            
+            // Usuário comum só pode editar clientes que ele cadastrou
+            return cliente.cadastrado_por === usuarioAtual.id;
+        }
+
         // Função para mostrar notificações
         function showNotification(text, type = 'success') {
             notification.innerHTML = text;
@@ -472,6 +617,72 @@
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 4000);
+        }
+
+        // Carregar dados do cliente para edição
+        async function carregarDadosCliente(id) {
+            try {
+                const { data: cliente, error } = await supabaseClient
+                    .from('clientes')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+
+                if (!cliente) {
+                    throw new Error('Cliente não encontrado');
+                }
+
+                // Verificar permissão
+                if (!verificarPermissaoEdicao(cliente)) {
+                    showNotification('❌ Você não tem permissão para editar este cliente', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'clientes.html';
+                    }, 2000);
+                    return;
+                }
+
+                clienteOriginal = cliente;
+                preencherFormulario(cliente);
+
+            } catch (error) {
+                console.error('Erro ao carregar cliente:', error);
+                showNotification(`❌ Erro: ${error.message}`, 'error');
+                setTimeout(() => {
+                    window.location.href = 'clientes.html';
+                }, 2000);
+            }
+        }
+
+        // Preencher formulário com dados do cliente
+        function preencherFormulario(cliente) {
+            tipoCliente.value = cliente.tipo_cliente;
+            tipoCliente.disabled = true; // Não permitir alterar tipo
+            
+            // Disparar evento change para configurar campos
+            tipoCliente.dispatchEvent(new Event('change'));
+            
+            nomeRazaoSocial.value = cliente.nome_razao_social || '';
+            nomeFantasia.value = cliente.nome_fantasia || '';
+            emailPrincipal.value = cliente.email_principal || '';
+            telefonePrincipal.value = formatarTelefone(cliente.telefone_principal || '');
+            cidadePrincipal.value = cliente.cidade_principal || '';
+
+            // Documento formatado
+            const doc = cliente.tipo_cliente === 'PF' ? cliente.cpf : cliente.cnpj;
+            if (doc) {
+                documento.value = formatarDocumento(doc, cliente.tipo_cliente);
+            }
+
+            // Campos PJ
+            if (cliente.tipo_cliente === 'PJ') {
+                inscricaoEstadual.value = cliente.inscricao_estadual || '';
+                inscricaoMunicipal.value = cliente.inscricao_municipal || '';
+            }
+
+            // Configurar nome para exclusão
+            document.getElementById('deleteClienteName').textContent = cliente.nome_razao_social;
         }
 
         // Gerar código único do cliente
@@ -593,8 +804,10 @@
                 documento.placeholder = '00.000.000/0000-00';
             }
 
-            // Limpar campo documento
-            documento.value = '';
+            // Limpar campo documento apenas se não estiver em modo de edição
+            if (!modoEdicao) {
+                documento.value = '';
+            }
         });
 
         // Formatação automática
@@ -612,34 +825,41 @@
         // Cadastrar cliente
         async function cadastrarCliente(dadosCliente) {
             try {
-                // Verificar se documento já existe
-                const docLimpo = dadosCliente.documento.replace(/\D/g, '');
-                const campoDoc = dadosCliente.tipo_cliente === 'PF' ? 'cpf' : 'cnpj';
-                
-                const { data: clienteExistente } = await supabaseClient
-                    .from('clientes')
-                    .select('id')
-                    .eq(campoDoc, docLimpo)
-                    .single();
+                // Verificar se documento já existe (apenas no cadastro)
+                if (!modoEdicao) {
+                    const docLimpo = dadosCliente.documento.replace(/\D/g, '');
+                    const campoDoc = dadosCliente.tipo_cliente === 'PF' ? 'cpf' : 'cnpj';
+                    
+                    const { data: clienteExistente } = await supabaseClient
+                        .from('clientes')
+                        .select('id')
+                        .eq(campoDoc, docLimpo)
+                        .single();
 
-                if (clienteExistente) {
-                    throw new Error('Já existe um cliente cadastrado com este documento!');
+                    if (clienteExistente) {
+                        throw new Error('Já existe um cliente cadastrado com este documento!');
+                    }
                 }
 
                 // Preparar dados para inserção
                 const dadosInsercao = {
-                    codigo_cliente: gerarCodigoCliente(dadosCliente.tipo_cliente),
                     tipo_cliente: dadosCliente.tipo_cliente,
                     nome_razao_social: dadosCliente.nome_razao_social,
                     nome_fantasia: dadosCliente.nome_fantasia || null,
                     email_principal: dadosCliente.email_principal || null,
                     telefone_principal: dadosCliente.telefone_principal || null,
-                    cidade_principal: dadosCliente.cidade_principal || null,
-                    cadastrado_por: usuarioAtual.id,
-                    data_cadastro: new Date().toISOString()
+                    cidade_principal: dadosCliente.cidade_principal || null
                 };
 
+                // Se for cadastro, adicionar campos de controle
+                if (!modoEdicao) {
+                    dadosInsercao.codigo_cliente = gerarCodigoCliente(dadosCliente.tipo_cliente);
+                    dadosInsercao.cadastrado_por = usuarioAtual.id;
+                    dadosInsercao.data_cadastro = new Date().toISOString();
+                }
+
                 // Adicionar documento no campo correto
+                const docLimpo = dadosCliente.documento.replace(/\D/g, '');
                 if (dadosCliente.tipo_cliente === 'PF') {
                     dadosInsercao.cpf = docLimpo;
                 } else {
@@ -648,14 +868,27 @@
                     dadosInsercao.inscricao_municipal = dadosCliente.inscricao_municipal || null;
                 }
 
-                // Inserir no Supabase
-                const { error } = await supabaseClient
-                    .from('clientes')
-                    .insert([dadosInsercao]);
+                let result;
+                if (modoEdicao) {
+                    // Atualizar cliente existente
+                    result = await supabaseClient
+                        .from('clientes')
+                        .update(dadosInsercao)
+                        .eq('id', clienteId);
+                } else {
+                    // Inserir novo cliente
+                    result = await supabaseClient
+                        .from('clientes')
+                        .insert([dadosInsercao]);
+                }
 
-                if (error) throw error;
+                if (result.error) throw result.error;
 
-                showNotification('✅ Cliente cadastrado com sucesso!', 'success');
+                const mensagem = modoEdicao ? 
+                    '✅ Cliente atualizado com sucesso!' : 
+                    '✅ Cliente cadastrado com sucesso!';
+                
+                showNotification(mensagem, 'success');
                 
                 // Redirecionar após um delay
                 setTimeout(() => {
@@ -663,7 +896,40 @@
                 }, 2000);
 
             } catch (error) {
-                console.error('Erro ao cadastrar cliente:', error);
+                console.error('Erro ao salvar cliente:', error);
+                showNotification(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Confirmar exclusão
+        function confirmarExclusao() {
+            deleteModal.classList.add('show');
+        }
+
+        // Fechar modal
+        function fecharModal() {
+            deleteModal.classList.remove('show');
+        }
+
+        // Excluir cliente
+        async function excluirCliente() {
+            try {
+                const { error } = await supabaseClient
+                    .from('clientes')
+                    .delete()
+                    .eq('id', clienteId);
+
+                if (error) throw error;
+
+                showNotification('✅ Cliente excluído com sucesso!', 'success');
+                fecharModal();
+                
+                setTimeout(() => {
+                    window.location.href = 'clientes.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Erro ao excluir cliente:', error);
                 showNotification(`❌ Erro: ${error.message}`, 'error');
             }
         }
@@ -716,7 +982,8 @@
 
             // Mostrar loading
             submitBtn.disabled = true;
-            submitText.innerHTML = '<div class="loading-spinner"></div> Cadastrando...';
+            const textoOriginal = submitText.innerHTML;
+            submitText.innerHTML = '<div class="loading-spinner"></div> ' + (modoEdicao ? 'Salvando...' : 'Cadastrando...');
 
             // Preparar dados
             const dadosCliente = {
@@ -725,7 +992,7 @@
                 nome_fantasia: nomeFantasia.value.trim(),
                 documento: doc,
                 email_principal: emailPrincipal.value.trim(),
-                telefone_principal: telefonePrincipal.value.trim(),
+                telefone_principal: telefonePrincipal.value.replace(/\D/g, ''),
                 cidade_principal: cidadePrincipal.value.trim()
             };
 
@@ -739,7 +1006,14 @@
 
             // Resetar botão
             submitBtn.disabled = false;
-            submitText.innerHTML = '💾 Cadastrar Cliente';
+            submitText.innerHTML = textoOriginal;
+        });
+
+        // Fechar modal ao clicar fora
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                fecharModal();
+            }
         });
 
         // Inicializar
@@ -749,6 +1023,7 @@
             
             if (usuario) {
                 console.log('✅ Usuário autenticado:', usuario.nome, '(' + usuario.cargo + ')');
+                verificarParametros();
             }
         });
     </script>
