@@ -396,6 +396,131 @@
             margin-top: 24px;
         }
 
+        .products-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .product-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .product-card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .product-card.editing {
+            border-color: #6366f1;
+            background: #fafafa;
+        }
+
+        .product-actions {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .product-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .product-id {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #6366f1;
+        }
+
+        .product-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .detail-value.price {
+            color: #ef4444;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .detail-input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .stock-badge {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .stock-high {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .stock-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .stock-low {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .search-controls {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 16px;
@@ -455,6 +580,7 @@
 
             <!-- Tab: Produtos -->
             <div id="products-tab" class="tab-content active">
+                <!-- Seção Adicionar Produto -->
                 <div class="card-header">
                     <div class="card-title">Adicionar Novo Produto</div>
                     <div class="card-subtitle">Cadastre produtos no sistema de estoque</div>
@@ -495,6 +621,32 @@
                             ✅ Adicionar Produto
                         </button>
                     </form>
+                </div>
+
+                <!-- Seção Produtos Existentes -->
+                <div class="card-header" style="border-top: 1px solid #e5e7eb; margin-top: 24px;">
+                    <div class="card-title">Produtos Cadastrados</div>
+                    <div class="card-subtitle">Gerencie os produtos existentes no estoque</div>
+                </div>
+                <div class="card-content">
+                    <!-- Controles de Busca -->
+                    <div class="search-controls" style="display: grid; grid-template-columns: 1fr auto; gap: 16px; margin-bottom: 24px; align-items: end;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Buscar produto</label>
+                            <input type="text" id="adminSearchInput" class="form-input" placeholder="Nome, ID ou categoria...">
+                        </div>
+                        <div>
+                            <span id="adminProductCount" style="color: #6b7280; font-size: 0.9rem;">0 produtos</span>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Produtos -->
+                    <div id="adminProductsContainer" class="products-grid">
+                        <div class="empty-state">
+                            <h3>Carregando produtos...</h3>
+                            <p>Aguarde enquanto buscamos seus dados</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -600,6 +752,19 @@
         </div>
     </div>
 
+    <!-- Modal Confirmar Deleção de Produto -->
+    <div id="confirmDeleteModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirmar Exclusão</h3>
+            <p>Tem certeza que deseja deletar este produto?</p>
+            <p><strong id="deleteProductName"></strong></p>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="confirmDeleteProduct()">Deletar</button>
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notificação -->
     <div id="notification" class="notification"></div>
 
@@ -615,6 +780,12 @@
         let editingUserId = null;
         let usuarioAtual = null;
 
+        // Variáveis para produtos
+        let products = [];
+        let filteredProducts = [];
+        let editingProductId = null;
+        let deleteProductId = null;
+
         // Elementos DOM
         const notification = document.getElementById('notification');
         const productForm = document.getElementById('productForm');
@@ -622,6 +793,11 @@
         const editUserForm = document.getElementById('editUserForm');
         const editUserModal = document.getElementById('editUserModal');
         const usersTableBody = document.getElementById('usersTableBody');
+        
+        // Elementos DOM para produtos
+        const adminProductsContainer = document.getElementById('adminProductsContainer');
+        const adminSearchInput = document.getElementById('adminSearchInput');
+        const adminProductCount = document.getElementById('adminProductCount');
 
         // Verificar se usuário é admin OU gerente
         function verificarAdmin() {
@@ -698,6 +874,20 @@
             }, 4000);
         }
 
+        // Funções auxiliares
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        function getStockClass(stock) {
+            if (stock >= 15) return 'stock-high';
+            if (stock >= 5) return 'stock-medium';
+            return 'stock-low';
+        }
+
         // Funções de navegação entre tabs
         function showTab(tabName) {
             // Verificar permissões para tab de usuários
@@ -726,6 +916,217 @@
 
         // ===== FUNÇÕES DE PRODUTOS =====
 
+        // Carregar produtos
+        async function loadProducts() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('produtos')
+                    .select('*')
+                    .order('id');
+
+                if (error) throw error;
+
+                products = data || [];
+                filteredProducts = [...products];
+                renderProducts();
+                updateProductCount();
+
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                showNotification(`❌ Erro ao carregar produtos: ${error.message}`, 'error');
+            }
+        }
+
+        // Aplicar filtros de busca
+        function applyProductFilters() {
+            const searchTerm = adminSearchInput.value.toLowerCase();
+
+            filteredProducts = products.filter(product => {
+                return product.id.toLowerCase().includes(searchTerm) ||
+                       product.tipo.toLowerCase().includes(searchTerm) ||
+                       product.categoria.toLowerCase().includes(searchTerm);
+            });
+
+            renderProducts();
+            updateProductCount();
+        }
+
+        // Atualizar contador
+        function updateProductCount() {
+            const count = filteredProducts.length;
+            adminProductCount.textContent = `${count} produto${count !== 1 ? 's' : ''}`;
+        }
+
+        // Renderizar produtos
+        function renderProducts() {
+            if (filteredProducts.length === 0) {
+                adminProductsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>${products.length === 0 ? 'Nenhum produto cadastrado' : 'Nenhum produto encontrado'}</h3>
+                        <p>${products.length === 0 ? 'Adicione um produto usando o formulário acima' : 'Tente ajustar o termo de busca'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = filteredProducts.map(product => `
+                <div class="product-card ${editingProductId === product.id ? 'editing' : ''}" data-id="${product.id}">
+                    <div class="product-actions">
+                        ${editingProductId === product.id ? `
+                            <button class="btn btn-success btn-small" onclick="saveEditProduct('${product.id}')" title="Salvar">✓</button>
+                            <button class="btn btn-secondary btn-small" onclick="cancelEditProduct()" title="Cancelar">✕</button>
+                        ` : `
+                            <button class="btn btn-secondary btn-small" onclick="editProduct('${product.id}')" title="Editar">✎</button>
+                            ${usuarioAtual && usuarioAtual.cargo === 'admin' ? `<button class="btn btn-danger btn-small" onclick="deleteProduct('${product.id}')" title="Excluir">✕</button>` : ''}
+                        `}
+                    </div>
+                    
+                    <div class="product-header">
+                        <div class="product-id">${product.id}</div>
+                    </div>
+                    
+                    <div class="product-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Tipo</div>
+                            <div class="detail-value">
+                                ${editingProductId === product.id ? 
+                                    `<input type="text" class="detail-input" id="edit-tipo" value="${product.tipo}">` :
+                                    product.tipo
+                                }
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Potência</div>
+                            <div class="detail-value">
+                                ${editingProductId === product.id ? 
+                                    `<input type="text" class="detail-input" id="edit-potencia" value="${product.potencia}">` :
+                                    product.potencia
+                                }
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Área Útil</div>
+                            <div class="detail-value">
+                                ${editingProductId === product.id ? 
+                                    `<input type="text" class="detail-input" id="edit-area_util" value="${product.area_util}">` :
+                                    product.area_util
+                                }
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Categoria</div>
+                            <div class="detail-value">
+                                ${editingProductId === product.id ? 
+                                    `<input type="text" class="detail-input" id="edit-categoria" value="${product.categoria}">` :
+                                    product.categoria
+                                }
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Estoque</div>
+                            <div class="detail-value">
+                                ${editingProductId === product.id ? 
+                                    `<input type="number" class="detail-input" id="edit-estoque" value="${product.estoque}">` :
+                                    `<span class="stock-badge ${getStockClass(product.estoque)}">${product.estoque}</span>`
+                                }
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Valor</div>
+                            <div class="detail-value price">
+                                ${editingProductId === product.id ? 
+                                    `<input type="number" step="0.01" class="detail-input" id="edit-valor" value="${product.valor}">` :
+                                    formatCurrency(product.valor)
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            adminProductsContainer.innerHTML = html;
+        }
+
+        // Editar produto
+        function editProduct(id) {
+            editingProductId = id;
+            renderProducts();
+        }
+
+        // Cancelar edição
+        function cancelEditProduct() {
+            editingProductId = null;
+            renderProducts();
+        }
+
+        // Salvar edições
+        async function saveEditProduct(id) {
+            try {
+                const updatedData = {
+                    tipo: document.getElementById('edit-tipo').value,
+                    potencia: document.getElementById('edit-potencia').value,
+                    area_util: document.getElementById('edit-area_util').value,
+                    categoria: document.getElementById('edit-categoria').value,
+                    estoque: parseInt(document.getElementById('edit-estoque').value),
+                    valor: parseFloat(document.getElementById('edit-valor').value)
+                };
+
+                const { error } = await supabaseClient
+                    .from('produtos')
+                    .update(updatedData)
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                showNotification('✅ Produto atualizado com sucesso!', 'success');
+                editingProductId = null;
+                await loadProducts(); // Recarregar para ter dados atualizados
+
+            } catch (error) {
+                console.error('Erro ao atualizar produto:', error);
+                showNotification(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Deletar produto (apenas admin)
+        function deleteProduct(id) {
+            if (!usuarioAtual || usuarioAtual.cargo !== 'admin') {
+                showNotification('Apenas administradores podem deletar produtos', 'error');
+                return;
+            }
+
+            const product = products.find(p => p.id === id);
+            document.getElementById('deleteProductName').textContent = `${product.id} - ${product.tipo}`;
+            deleteProductId = id;
+            document.getElementById('confirmDeleteModal').classList.add('show');
+        }
+
+        // Fechar modal de deleção
+        function closeDeleteModal() {
+            document.getElementById('confirmDeleteModal').classList.remove('show');
+            deleteProductId = null;
+        }
+
+        // Confirmar deleção
+        async function confirmDeleteProduct() {
+            try {
+                const { error } = await supabaseClient
+                    .from('produtos')
+                    .delete()
+                    .eq('id', deleteProductId);
+
+                if (error) throw error;
+
+                showNotification('✅ Produto deletado com sucesso!', 'success');
+                closeDeleteModal();
+                await loadProducts(); // Recarregar lista
+
+            } catch (error) {
+                console.error('Erro ao deletar produto:', error);
+                showNotification(`❌ Erro: ${error.message}`, 'error');
+            }
+        }
+
         async function addProduct(data) {
             try {
                 const { error } = await supabaseClient
@@ -736,6 +1137,7 @@
 
                 showNotification('✅ Produto adicionado com sucesso!', 'success');
                 productForm.reset();
+                await loadProducts(); // Recarregar lista
 
             } catch (error) {
                 console.error('Erro ao adicionar produto:', error);
@@ -925,6 +1327,9 @@
             await addProduct(data);
         });
 
+        // Event listener para busca de produtos
+        adminSearchInput.addEventListener('input', applyProductFilters);
+
         userForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -968,9 +1373,22 @@
                 console.log('✅ Acesso autorizado:', usuario.nome, '(' + usuario.cargo + ')');
                 configurarPermissoesAdmin(usuario);
                 
+                // Carregar dados iniciais
+                loadProducts(); // Sempre carregar produtos
+                
                 // Só carregar usuários se for admin
                 if (usuario.cargo === 'admin') {
                     loadUsers();
+                }
+
+                // Configurar event listeners para modais
+                const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+                if (confirmDeleteModal) {
+                    confirmDeleteModal.addEventListener('click', (e) => {
+                        if (e.target === confirmDeleteModal) {
+                            closeDeleteModal();
+                        }
+                    });
                 }
             } else {
                 console.log('❌ Acesso negado - redirecionando...');
