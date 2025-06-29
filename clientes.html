@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - Sistema de Estoque</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fb;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #5856eb;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            font-size: 0.9rem;
+            color: #4ade80;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .card-content {
+            padding: 24px;
+        }
+
+        .clientes-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .cliente-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.2s;
+        }
+
+        .cliente-card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .cliente-header {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cliente-tipo {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tipo-pf {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .tipo-pj {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .cliente-codigo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #6366f1;
+        }
+
+        .cliente-nome {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .cliente-fantasia {
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-style: italic;
+            margin-bottom: 16px;
+        }
+
+        .cliente-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 320px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-color: #10b981;
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .notification.error {
+            border-color: #ef4444;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header {
+                padding: 20px 0;
+            }
+
+            .back-btn {
+                position: relative;
+                top: auto;
+                left: auto;
+                margin-bottom: 20px;
+            }
+
+            .cliente-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <a href="index.html" class="back-btn">
+                ← Voltar ao Sistema
+            </a>
+            
+            <h1>👥 Clientes</h1>
+            <p>Lista de clientes cadastrados no sistema</p>
+            <div class="status">
+                <div class="status-dot"></div>
+                <span id="connectionStatus">Carregando...</span>
+            </div>
+        </div>
+
+        <!-- Lista de Clientes -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Clientes Cadastrados</div>
+                <div class="card-subtitle">Total: <span id="totalClientes">0</span> clientes</div>
+            </div>
+            <div class="card-content">
+                <div id="clientesContainer" class="clientes-grid">
+                    <div class="empty-state">
+                        <h3>Carregando clientes...</h3>
+                        <p>Aguarde enquanto buscamos seus dados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificação -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // CONFIGURAÇÃO DO SUPABASE
+        const SUPABASE_URL = 'https://bfmsnvaadrlhlofmlprt.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJmbXNudmFhZHJsaGxvZm1scHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExMjkxODgsImV4cCI6MjA2NjcwNTE4OH0.LPipIRVv2yZH3pTb6Zdz2Jqj7pQ1X5mjZ4ikF_R_Fik';
+        
+        // Inicializar Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let clientes = [];
+
+        // Elementos DOM
+        const totalClientes = document.getElementById('totalClientes');
+        const clientesContainer = document.getElementById('clientesContainer');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const notification = document.getElementById('notification');
+
+        // Função para mostrar notificações
+        function showNotification(text, type = 'success') {
+            notification.innerHTML = text;
+            notification.className = `notification ${type} show`;
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Função para formatar documentos
+        function formatDocument(doc, tipo) {
+            if (!doc) return '-';
+            
+            if (tipo === 'PF' && doc.length === 11) {
+                // Formatar CPF: 000.000.000-00
+                return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            } else if (tipo === 'PJ' && doc.length === 14) {
+                // Formatar CNPJ: 00.000.000/0000-00
+                return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+            }
+            
+            return doc;
+        }
+
+        // Função para formatar telefone
+        function formatPhone(phone) {
+            if (!phone) return '-';
+            
+            // Remover caracteres não numéricos
+            const clean = phone.replace(/\D/g, '');
+            
+            if (clean.length === 11) {
+                // Celular: (00) 00000-0000
+                return clean.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (clean.length === 10) {
+                // Fixo: (00) 0000-0000
+                return clean.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+            }
+            
+            return phone;
+        }
+
+        // Renderizar clientes
+        function renderClientes() {
+            if (clientes.length === 0) {
+                clientesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Nenhum cliente encontrado</h3>
+                        <p>Os clientes cadastrados aparecerão aqui</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = clientes.map(cliente => {
+                const documento = cliente.tipo_cliente === 'PF' ? 
+                    formatDocument(cliente.cpf, 'PF') : 
+                    formatDocument(cliente.cnpj, 'PJ');
+
+                return `
+                    <div class="cliente-card">
+                        <div class="cliente-header">
+                            <span class="cliente-tipo ${cliente.tipo_cliente === 'PF' ? 'tipo-pf' : 'tipo-pj'}">
+                                ${cliente.tipo_cliente}
+                            </span>
+                            <span class="cliente-codigo">${cliente.codigo_cliente}</span>
+                        </div>
+                        
+                        <div class="cliente-nome">${cliente.nome_razao_social}</div>
+                        ${cliente.nome_fantasia ? `<div class="cliente-fantasia">${cliente.nome_fantasia}</div>` : ''}
+                        
+                        <div class="cliente-details">
+                            <div class="detail-item">
+                                <div class="detail-label">${cliente.tipo_cliente === 'PF' ? 'CPF' : 'CNPJ'}</div>
+                                <div class="detail-value">${documento}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Email</div>
+                                <div class="detail-value">${cliente.email_principal || '-'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Telefone</div>
+                                <div class="detail-value">${formatPhone(cliente.telefone_principal)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Cidade</div>
+                                <div class="detail-value">${cliente.cidade_principal || '-'}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Data Cadastro</div>
+                                <div class="detail-value">${new Date(cliente.data_cadastro).toLocaleDateString('pt-BR')}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            clientesContainer.innerHTML = html;
+        }
+
+        // Carregar clientes
+        async function loadClientes() {
+            try {
+                connectionStatus.textContent = 'Carregando...';
+                
+                const { data, error } = await supabaseClient
+                    .from('clientes')
+                    .select('*')
+                    .order('nome_razao_social');
+
+                if (error) {
+                    console.error('Erro ao carregar clientes:', error);
+                    throw error;
+                }
+
+                clientes = data || [];
+                totalClientes.textContent = clientes.length;
+                renderClientes();
+                connectionStatus.textContent = 'Sistema ativo';
+                
+                showNotification(`✅ ${clientes.length} cliente(s) carregado(s) com sucesso!`, 'success');
+
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+                connectionStatus.textContent = 'Erro de conexão';
+                showNotification(`❌ Erro ao carregar clientes: ${error.message}`, 'error');
+                
+                clientesContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Erro ao carregar clientes</h3>
+                        <p>Verifique sua conexão e tente novamente</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Inicializar quando a página carregar
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('🔍 Carregando página de clientes...');
+            loadClientes();
+        });
+    </script>
+</body>
+</html>
