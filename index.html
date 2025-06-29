@@ -829,6 +829,7 @@
             const userInfo = document.createElement('div');
             userInfo.className = 'user-info';
             
+            // Definir menu baseado no cargo do usuário
             let menuItems = '';
             if (usuarioAtual.cargo === 'admin') {
                 menuItems = `
@@ -836,8 +837,12 @@
                         <span class="dropdown-icon">📦</span>
                         Gerenciar Produtos
                     </a>
-                    <a href="admin.html#users" class="dropdown-item admin-only">
+                    <a href="clientes.html" class="dropdown-item admin-only">
                         <span class="dropdown-icon">👥</span>
+                        Gerenciar Clientes
+                    </a>
+                    <a href="admin.html#users" class="dropdown-item admin-only">
+                        <span class="dropdown-icon">👤</span>
                         Gerenciar Usuários
                     </a>
                 `;
@@ -846,6 +851,17 @@
                     <a href="admin.html" class="dropdown-item admin-only">
                         <span class="dropdown-icon">📦</span>
                         Gerenciar Produtos
+                    </a>
+                    <a href="clientes.html" class="dropdown-item admin-only">
+                        <span class="dropdown-icon">👥</span>
+                        Gerenciar Clientes
+                    </a>
+                `;
+            } else if (usuarioAtual.cargo === 'usuario') {
+                menuItems = `
+                    <a href="clientes.html" class="dropdown-item">
+                        <span class="dropdown-icon">👥</span>
+                        Meus Clientes
                     </a>
                 `;
             }
