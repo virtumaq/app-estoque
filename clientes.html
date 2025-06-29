@@ -604,6 +604,16 @@
             return cliente.cadastrado_por === usuarioAtual.id;
         }
 
+        // Função para criar novo orçamento para um cliente específico
+        function novoOrcamento(clienteId) {
+            window.location.href = `novo-orcamento.html?cliente=${clienteId}`;
+        }
+
+        // Função para editar cliente
+        function editarCliente(clienteId) {
+            window.location.href = `cadastro-cliente.html?edit=${clienteId}`;
+        }
+
         // Atualizar estatísticas
         function updateStats() {
             const total = clientes.length;
@@ -694,11 +704,6 @@
         if (periodoFilter) periodoFilter.addEventListener('change', applyFilters);
         if (statusFilter) statusFilter.addEventListener('change', applyFilters);
 
-        // Função para editar cliente
-        function editarCliente(clienteId) {
-            window.location.href = `cadastro-cliente.html?edit=${clienteId}`;
-        }
-
         // Renderizar clientes
         function renderClientes() {
             const clientesToRender = filteredClientes || clientes;
@@ -726,13 +731,16 @@
 
                 return `
                     <div class="cliente-card">
-                        ${podeEditarCliente(cliente) ? `
-                            <div class="cliente-actions">
+                        <div class="cliente-actions">
+                            <button class="btn btn-success btn-small" onclick="novoOrcamento('${cliente.id}')" title="Criar orçamento para este cliente">
+                                📋 Novo Orçamento
+                            </button>
+                            ${podeEditarCliente(cliente) ? `
                                 <button class="btn btn-secondary btn-small" onclick="editarCliente('${cliente.id}')" title="Editar cliente">
                                     ✏️ Editar
                                 </button>
-                            </div>
-                        ` : ''}
+                            ` : ''}
+                        </div>
                         
                         <div class="cliente-header">
                             <span class="cliente-tipo ${cliente.tipo_cliente === 'PF' ? 'tipo-pf' : 'tipo-pj'}">
