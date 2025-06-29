@@ -774,7 +774,7 @@
                 
                 // Verificar se tem permissão para acessar admin
                 if (usuarioAtual.cargo === 'usuario') {
-                    alert('Acesso negado! Apenas administradores podem acessar esta área.');
+                    alert('Acesso negado! Apenas administradores e gerentes podem acessar esta área.');
                     window.location.href = 'index.html';
                     return null;
                 }
