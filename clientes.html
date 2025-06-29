@@ -190,6 +190,15 @@
             background: #e5e7eb;
         }
 
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
         .btn-small {
             padding: 6px 12px;
             font-size: 0.8rem;
@@ -238,12 +247,21 @@
             border: 1px solid #e5e7eb;
             border-radius: 12px;
             padding: 24px;
+            position: relative;
             transition: all 0.2s;
         }
 
         .cliente-card:hover {
             border-color: #d1d5db;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .cliente-actions {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            gap: 8px;
         }
 
         .cliente-header {
@@ -459,9 +477,14 @@
                         </select>
                     </div>
                     
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-secondary btn-small" onclick="exportToExcel()">Excel</button>
-                        <button class="btn btn-secondary btn-small" onclick="exportToPDF()">PDF</button>
+                    <div style="display: flex; gap: 8px; flex-direction: column;">
+                        <a href="cadastro-cliente.html" class="btn btn-success" style="text-decoration: none !important;">
+                            ➕ Novo Cliente
+                        </a>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-secondary btn-small" onclick="exportToExcel()">Excel</button>
+                            <button class="btn btn-secondary btn-small" onclick="exportToPDF()">PDF</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -497,6 +520,7 @@
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let clientes = [];
+        let usuarioAtual = null;
 
         // Elementos DOM
         const totalClientes = document.getElementById('totalClientes');
@@ -552,6 +576,19 @@
             return phone;
         }
 
+        // Verificar se pode editar cliente
+        function podeEditarCliente(cliente) {
+            if (!usuarioAtual) return false;
+            
+            // Admin e gerente podem editar qualquer cliente
+            if (usuarioAtual.cargo === 'admin' || usuarioAtual.cargo === 'gerente') {
+                return true;
+            }
+            
+            // Usuário comum só pode editar clientes que ele cadastrou
+            return cliente.cadastrado_por === usuarioAtual.id;
+        }
+
         // Atualizar estatísticas
         function updateStats() {
             const total = clientes.length;
@@ -592,6 +629,11 @@
             showNotification('Função de exportação será implementada em breve', 'success');
         }
 
+        // Função para editar cliente
+        function editarCliente(clienteId) {
+            window.location.href = `cadastro-cliente.html?edit=${clienteId}`;
+        }
+
         // Renderizar clientes
         function renderClientes() {
             if (clientes.length === 0) {
@@ -614,6 +656,14 @@
 
                 return `
                     <div class="cliente-card">
+                        ${podeEditarCliente(cliente) ? `
+                            <div class="cliente-actions">
+                                <button class="btn btn-secondary btn-small" onclick="editarCliente('${cliente.id}')" title="Editar cliente">
+                                    ✏️ Editar
+                                </button>
+                            </div>
+                        ` : ''}
+                        
                         <div class="cliente-header">
                             <span class="cliente-tipo ${cliente.tipo_cliente === 'PF' ? 'tipo-pf' : 'tipo-pj'}">
                                 ${cliente.tipo_cliente}
@@ -722,6 +772,17 @@
         // Inicializar quando a página carregar
         window.addEventListener('DOMContentLoaded', () => {
             console.log('🔍 Carregando página de clientes...');
+            
+            // Verificar usuário logado
+            const dadosUsuario = localStorage.getItem('usuarioLogado');
+            if (dadosUsuario) {
+                try {
+                    usuarioAtual = JSON.parse(dadosUsuario);
+                } catch (error) {
+                    console.error('Erro ao ler dados do usuário:', error);
+                }
+            }
+            
             loadClientes();
         });
     </script>
