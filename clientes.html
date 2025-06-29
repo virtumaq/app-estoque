@@ -419,6 +419,13 @@
                                 <div class="detail-value">${cliente.cidade_principal || '-'}</div>
                             </div>
                             <div class="detail-item">
+                                <div class="detail-label">Vendedor Responsável</div>
+                                <div class="detail-value" style="color: #6366f1; font-weight: 600;">
+                                    👤 ${cliente.usuarios?.nome || 'N/A'} 
+                                    <span style="font-size: 0.8rem; color: #6b7280;">(${cliente.usuarios?.cargo || ''})</span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
                                 <div class="detail-label">Data Cadastro</div>
                                 <div class="detail-value">${new Date(cliente.data_cadastro).toLocaleDateString('pt-BR')}</div>
                             </div>
@@ -437,7 +444,13 @@
                 
                 const { data, error } = await supabaseClient
                     .from('clientes')
-                    .select('*')
+                    .select(`
+                        *,
+                        usuarios!cadastrado_por (
+                            nome,
+                            cargo
+                        )
+                    `)
                     .order('nome_razao_social');
 
                 if (error) {
