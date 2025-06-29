@@ -339,12 +339,9 @@
         <div class="card">
             <div class="card-header">
                 <div class="card-title-group">
-                    <div class="card-title">Filtros e Ações</div>
+                    <div class="card-title">Filtros e Controles</div>
                     <div class="card-subtitle">Busque clientes ou adicione novos cadastros</div>
                 </div>
-                <a href="cadastro-cliente.html" class="btn btn-success" id="addClienteBtn">
-                    ➕ Novo Cliente
-                </a>
             </div>
             <div class="card-content">
                 <div class="controls">
@@ -372,9 +369,14 @@
                         </select>
                     </div>
                     
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-secondary btn-small" onclick="exportToExcel()">📊 Excel</button>
-                        <button class="btn btn-secondary btn-small" onclick="exportToPDF()">📄 PDF</button>
+                    <div style="display: flex; gap: 8px; flex-direction: column;">
+                        <a href="cadastro-cliente.html" class="btn btn-success" id="addClienteBtn" style="text-decoration: none !important;">
+                            ➕ Novo Cliente
+                        </a>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-secondary btn-small" onclick="exportToExcel()">📊 Excel</button>
+                            <button class="btn btn-secondary btn-small" onclick="exportToPDF()">📄 PDF</button>
+                        </div>
                     </div>
                 </div>
             </div>
